@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${appName}">Stock Insights</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <main class="container">
+        <h1 th:text="${appName}">Stock Insights</h1>
+        <p class="tagline">
+            Rich per-stock insights &mdash; fundamentals, estimates, analyst ratings,
+            news and price history &mdash; for a curated set of tickers.
+        </p>
+        <p class="status">
+            Skeleton is running. Health check:
+            <a th:href="@{/health}">/health</a>.
+        </p>
+        <p class="muted">
+            Dashboard and stock detail pages arrive in the next milestones.
+        </p>
+    </main>
+</body>
+</html>
