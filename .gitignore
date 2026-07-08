@@ -2,9 +2,9 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 
-# Build output
-build/
-out/
+# Build output (anchored to repo root so they don't match source packages like adapter/out/)
+/build/
+/out/
 
 # IDEs
 .idea/
