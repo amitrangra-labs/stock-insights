@@ -9,10 +9,10 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password: ""
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
+  # Create the cache tables from schema.sql on startup (idempotent: CREATE ... IF NOT EXISTS).
+  sql:
+    init:
+      mode: always
   h2:
     console:
       enabled: true
@@ -30,8 +30,9 @@ stock-insights:
     - MSFT
     - NVDA
   # Background refresh cadence (Journey A). Kept conservative to respect free-tier
-  # rate limits.
+  # rate limits. The initial delay lets the app finish starting before the first fetch.
   refresh-interval-ms: 300000
+  refresh-initial-delay-ms: 10000
   market-data:
     finnhub:
       base-url: https://finnhub.io/api/v1

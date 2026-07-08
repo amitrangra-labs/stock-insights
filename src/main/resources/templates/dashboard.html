@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard &middot; Stock Insights</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <main class="container container--wide">
+        <header class="page-head">
+            <h1>Dashboard</h1>
+            <a class="back-link" th:href="@{/}">&larr; Home</a>
+        </header>
+
+        <p class="muted">
+            Prices are served from a local cache refreshed in the background, so they may lag the
+            live market. A dash (&mdash;) means no data has been cached yet.
+        </p>
+
+        <table class="quotes">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th>Name</th>
+                    <th class="num">Price</th>
+                    <th class="num">Change</th>
+                    <th class="num">Change %</th>
+                    <th>As of</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="row : ${rows}">
+                    <td class="ticker" th:text="${row.ticker}">AAPL</td>
+                    <td th:text="${row.name}">Apple Inc</td>
+                    <td class="num" th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.price,1,2)} : '—'">0.00</td>
+                    <td class="num"
+                        th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
+                        th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.change,1,2)} : '—'">0.00</td>
+                    <td class="num"
+                        th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
+                        th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.percentChange,1,2)} + '%' : '—'">0.00%</td>
+                    <td class="muted" th:text="${row.asOfDisplay()}">—</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(rows)}">
+                    <td colspan="6" class="muted">No tickers are being tracked. Configure some in application.yml.</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

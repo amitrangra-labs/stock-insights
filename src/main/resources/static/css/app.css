@@ -51,3 +51,59 @@ a {
     color: var(--muted);
     font-size: 0.95rem;
 }
+
+.container--wide {
+    max-width: 960px;
+}
+
+.page-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.back-link {
+    font-size: 0.95rem;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.6rem 1.1rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+table.quotes {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-variant-numeric: tabular-nums;
+}
+
+table.quotes th,
+table.quotes td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    text-align: left;
+}
+
+table.quotes th.num,
+table.quotes td.num {
+    text-align: right;
+}
+
+table.quotes .ticker {
+    font-weight: 700;
+}
+
+table.quotes td.up {
+    color: #16a34a;
+}
+
+table.quotes td.down {
+    color: #dc2626;
+}

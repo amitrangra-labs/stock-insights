@@ -1,7 +1,11 @@
 package com.amitrangralabs.stockinsights.adapter.in.config;
 
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.DashboardEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HealthEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HomeEndpoint;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.RefreshScheduler;
+import com.amitrangralabs.stockinsights.domain.service.DashboardService;
+import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +45,15 @@ public class InboundConfig {
     @Bean
     public HomeEndpoint homeEndpoint() {
         return new HomeEndpoint();
+    }
+
+    @Bean
+    public DashboardEndpoint dashboardEndpoint(DashboardService dashboardService) {
+        return new DashboardEndpoint(dashboardService);
+    }
+
+    @Bean
+    public RefreshScheduler refreshScheduler(MarketDataRefreshService marketDataRefreshService) {
+        return new RefreshScheduler(marketDataRefreshService);
     }
 }

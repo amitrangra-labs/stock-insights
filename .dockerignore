@@ -1,0 +1,10 @@
+# Keep the build context small and avoid leaking local state into the image.
+target/
+data/
+.git/
+.github/
+.idea/
+*.iml
+.env
+*.log
+.DS_Store
