@@ -3,9 +3,12 @@ package com.amitrangralabs.stockinsights.adapter.in.config;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.DashboardEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HealthEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HomeEndpoint;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceHistoryApiEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.RefreshScheduler;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.StockDetailEndpoint;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
+import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,5 +58,15 @@ public class InboundConfig {
     @Bean
     public RefreshScheduler refreshScheduler(MarketDataRefreshService marketDataRefreshService) {
         return new RefreshScheduler(marketDataRefreshService);
+    }
+
+    @Bean
+    public StockDetailEndpoint stockDetailEndpoint(StockDetailService stockDetailService) {
+        return new StockDetailEndpoint(stockDetailService);
+    }
+
+    @Bean
+    public PriceHistoryApiEndpoint priceHistoryApiEndpoint(StockDetailService stockDetailService) {
+        return new PriceHistoryApiEndpoint(stockDetailService);
     }
 }

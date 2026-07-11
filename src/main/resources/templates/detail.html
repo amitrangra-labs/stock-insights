@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${detail.ticker} + ' · Stock Insights'">TICKER · Stock Insights</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+    <main class="container container--wide">
+        <header class="page-head">
+            <h1>
+                <span th:text="${detail.displayName()}">Company</span>
+                <span class="ticker-badge" th:text="${detail.ticker}">TICK</span>
+            </h1>
+            <a class="back-link" th:href="@{/dashboard}">&larr; Dashboard</a>
+        </header>
+
+        <!-- Latest quote -->
+        <section class="quote-summary" th:if="${detail.hasQuote()}">
+            <span class="price" th:text="${#numbers.formatDecimal(detail.quote.current, 1, 2)}">0.00</span>
+            <span class="change"
+                  th:classappend="${detail.quote.change >= 0} ? ' up' : ' down'"
+                  th:text="${(detail.quote.change >= 0 ? '+' : '') +
+                            #numbers.formatDecimal(detail.quote.change, 1, 2) + ' (' +
+                            #numbers.formatDecimal(detail.quote.percentChange, 1, 2) + '%)'}">+0.00 (0.00%)</span>
+            <span class="currency muted" th:if="${detail.hasProfile()}" th:text="${detail.profile.currency}">USD</span>
+        </section>
+        <p class="muted" th:unless="${detail.hasQuote()}">No quote cached yet.</p>
+
+        <!-- Price history chart (rendered client-side from the JSON API, no external libs) -->
+        <section class="chart-card">
+            <h2>Price history</h2>
+            <canvas id="price-chart" height="320" th:attr="data-ticker=${detail.ticker}">
+                Your browser does not support the canvas element.
+            </canvas>
+            <p id="chart-empty" class="muted" hidden>No price history cached yet.</p>
+        </section>
+
+        <!-- Company profile -->
+        <section class="profile" th:if="${detail.hasProfile()}">
+            <h2>Profile</h2>
+            <dl class="facts">
+                <dt>Exchange</dt><dd th:text="${detail.profile.exchange}">—</dd>
+                <dt>Industry</dt><dd th:text="${detail.profile.industry}">—</dd>
+                <dt>Market cap</dt><dd th:text="${#numbers.formatDecimal(detail.profile.marketCap, 1, 0)} + ' (M)'">—</dd>
+                <dt>Website</dt>
+                <dd>
+                    <a th:if="${detail.profile.webUrl != null and !detail.profile.webUrl.isBlank()}"
+                       th:href="${detail.profile.webUrl}" th:text="${detail.profile.webUrl}"
+                       rel="noopener noreferrer" target="_blank">—</a>
+                    <span th:unless="${detail.profile.webUrl != null and !detail.profile.webUrl.isBlank()}">—</span>
+                </dd>
+            </dl>
+        </section>
+        <p class="muted" th:unless="${detail.hasProfile()}">No company profile cached yet.</p>
+    </main>
+
+    <script th:src="@{/js/price-chart.js}"></script>
+</body>
+</html>

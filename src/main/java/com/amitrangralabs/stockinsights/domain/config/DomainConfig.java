@@ -2,8 +2,11 @@ package com.amitrangralabs.stockinsights.domain.config;
 
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
+import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import java.util.List;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -25,15 +28,30 @@ public class DomainConfig {
     public MarketDataRefreshService marketDataRefreshService(
             MarketDataPort marketDataPort,
             MarketDataRepositoryPort marketDataRepositoryPort,
+            PriceHistoryPort priceHistoryPort,
+            PriceHistoryRepositoryPort priceHistoryRepositoryPort,
             Environment env) {
         return new MarketDataRefreshService(
-                marketDataPort, marketDataRepositoryPort, trackedTickers(env));
+                marketDataPort,
+                marketDataRepositoryPort,
+                priceHistoryPort,
+                priceHistoryRepositoryPort,
+                trackedTickers(env));
     }
 
     @Bean
     public DashboardService dashboardService(
             MarketDataRepositoryPort marketDataRepositoryPort, Environment env) {
         return new DashboardService(marketDataRepositoryPort, trackedTickers(env));
+    }
+
+    @Bean
+    public StockDetailService stockDetailService(
+            MarketDataRepositoryPort marketDataRepositoryPort,
+            PriceHistoryRepositoryPort priceHistoryRepositoryPort,
+            Environment env) {
+        return new StockDetailService(
+                marketDataRepositoryPort, priceHistoryRepositoryPort, trackedTickers(env));
     }
 
     /** Binds {@code stock-insights.tracked-tickers} (a YAML list) to a {@code List<String>}. */

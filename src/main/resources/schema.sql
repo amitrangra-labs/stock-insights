@@ -23,3 +23,15 @@ CREATE TABLE IF NOT EXISTS company_profiles (
     logo_url   VARCHAR(512),
     web_url    VARCHAR(512)
 );
+
+-- Daily price history, one row per (ticker, trading day). Upserted by the persistence adapter.
+CREATE TABLE IF NOT EXISTS price_history (
+    ticker      VARCHAR(16) NOT NULL,
+    trade_date  DATE        NOT NULL,
+    open_price  DOUBLE      NOT NULL,
+    high_price  DOUBLE      NOT NULL,
+    low_price   DOUBLE      NOT NULL,
+    close_price DOUBLE      NOT NULL,
+    volume      BIGINT      NOT NULL,
+    PRIMARY KEY (ticker, trade_date)
+);

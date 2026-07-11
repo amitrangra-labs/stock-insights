@@ -7,8 +7,8 @@ curated set of tickers.
 Built with **Spring Boot + Thymeleaf** using a **Domain / Port / Adapter** (hexagonal)
 architecture with **explicit Spring wiring** (no `@Autowired`, no stereotype scanning).
 
-> Status: M1 — a live dashboard of tracked tickers backed by a background refresh.
-> Stock-detail pages land in the next milestone.
+> Status: M2 — dashboard plus per-stock detail pages with a price-history chart.
+> Everything is served from a background-refreshed local cache.
 
 ## Quick start
 
@@ -28,13 +28,17 @@ set -a && source .env && set +a
 Then open:
 
 - <http://localhost:8080/> — landing page
-- <http://localhost:8080/dashboard> — tracked-ticker dashboard
+- <http://localhost:8080/dashboard> — tracked-ticker dashboard (each ticker links to its detail page)
+- <http://localhost:8080/stocks/AAPL> — stock detail: latest quote, company profile, and a price-history chart
+- <http://localhost:8080/api/stocks/AAPL/history> — JSON price history (backs the chart)
 - <http://localhost:8080/health> — health check (`{"status":"UP",...}`)
 
-Without an API key the app still runs — the dashboard lists the tracked tickers
-with placeholder (`—`) values and logs a warning each refresh. Add a free
-`FINNHUB_API_KEY` (below) to populate live-ish prices. Edit the tracked tickers
-under `stock-insights.tracked-tickers` in
+Quotes and company profiles come from Finnhub (needs a free key); **price history
+comes from a keyless source, so the chart works with no key at all.** Without a
+`FINNHUB_API_KEY` the app still runs — the dashboard and detail pages show
+placeholder (`—`) quote values and log a warning each refresh, while the history
+chart still populates. Add a free `FINNHUB_API_KEY` (below) for live-ish quotes.
+Edit the tracked tickers under `stock-insights.tracked-tickers` in
 [`application.yml`](src/main/resources/application.yml).
 
 Run the tests:
@@ -88,16 +92,18 @@ with a Spring env var, e.g. `-e STOCK_INSIGHTS_REFRESH_INTERVAL_MS=60000`.
 
 ## Data sources (free tiers)
 
-Stock data comes from free/freemium APIs behind a `MarketDataPort` interface, so providers
-can be swapped without touching the domain:
+Stock data comes from free APIs behind port interfaces, so providers can be swapped
+without touching the domain:
 
-- **[Finnhub](https://finnhub.io/register)** — quotes, company profile, news, analyst
-  recommendation trends.
-- **[Alpha Vantage](https://www.alphavantage.co/support/#api-key)** — fundamentals and
-  earnings estimates.
+- **[Finnhub](https://finnhub.io/register)** (`MarketDataPort`) — quotes and company
+  profiles. Needs a free API key.
+- **Yahoo Finance chart API** (`PriceHistoryPort`) — daily price history. Keyless, so the
+  chart works out of the box. Unofficial endpoint; swap behind the port for a licensed
+  feed if needed.
 
-Free tiers are rate-limited, so a background scheduler refreshes the tracked tickers
-periodically and pages always read from a local cache (H2) — never calling the APIs directly.
+A background scheduler refreshes the tracked tickers periodically and pages always read
+from a local cache (H2) — never calling the APIs directly, which keeps the UI fast and
+within free-tier rate limits.
 
 ## Architecture
 

@@ -31,7 +31,9 @@
             </thead>
             <tbody>
                 <tr th:each="row : ${rows}">
-                    <td class="ticker" th:text="${row.ticker}">AAPL</td>
+                    <td class="ticker">
+                        <a th:href="@{/stocks/{t}(t=${row.ticker})}" th:text="${row.ticker}">AAPL</a>
+                    </td>
                     <td th:text="${row.name}">Apple Inc</td>
                     <td class="num" th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.price,1,2)} : '—'">0.00</td>
                     <td class="num"

@@ -1,9 +1,12 @@
 package com.amitrangralabs.stockinsights.domain.service;
 
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
+import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +27,24 @@ public class MarketDataRefreshService {
 
     private final MarketDataPort marketData;
     private final MarketDataRepositoryPort repository;
+    private final PriceHistoryPort priceHistory;
+    private final PriceHistoryRepositoryPort priceHistoryRepository;
     private final List<String> trackedTickers;
 
     public MarketDataRefreshService(
             MarketDataPort marketData,
             MarketDataRepositoryPort repository,
+            PriceHistoryPort priceHistory,
+            PriceHistoryRepositoryPort priceHistoryRepository,
             List<String> trackedTickers) {
         this.marketData = marketData;
         this.repository = repository;
+        this.priceHistory = priceHistory;
+        this.priceHistoryRepository = priceHistoryRepository;
         this.trackedTickers = List.copyOf(trackedTickers);
     }
 
-    /** Refresh quote and profile for every tracked ticker. Never throws. */
+    /** Refresh quote, profile, and price history for every tracked ticker. Never throws. */
     public void refreshAll() {
         if (trackedTickers.isEmpty()) {
             log.info("No tracked tickers configured; nothing to refresh.");
@@ -44,6 +53,7 @@ public class MarketDataRefreshService {
         log.info("Refreshing market data for {} ticker(s): {}", trackedTickers.size(), trackedTickers);
         int quotes = 0;
         int profiles = 0;
+        int histories = 0;
         for (String ticker : trackedTickers) {
             if (refreshQuote(ticker)) {
                 quotes++;
@@ -51,9 +61,13 @@ public class MarketDataRefreshService {
             if (refreshProfile(ticker)) {
                 profiles++;
             }
+            if (refreshHistory(ticker)) {
+                histories++;
+            }
         }
-        log.info("Refresh complete: {}/{} quotes, {}/{} profiles updated.",
-                quotes, trackedTickers.size(), profiles, trackedTickers.size());
+        int n = trackedTickers.size();
+        log.info("Refresh complete: {}/{} quotes, {}/{} profiles, {}/{} histories updated.",
+                quotes, n, profiles, n, histories, n);
     }
 
     private boolean refreshQuote(String ticker) {
@@ -74,6 +88,17 @@ public class MarketDataRefreshService {
             return true;
         } catch (RuntimeException e) {
             log.warn("Could not refresh profile for {}: {}", ticker, e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean refreshHistory(String ticker) {
+        try {
+            List<PricePoint> history = priceHistory.fetchDailyHistory(ticker);
+            priceHistoryRepository.saveHistory(ticker, history);
+            return true;
+        } catch (RuntimeException e) {
+            log.warn("Could not refresh history for {}: {}", ticker, e.getMessage());
             return false;
         }
     }

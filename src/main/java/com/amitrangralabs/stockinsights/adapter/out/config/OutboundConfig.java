@@ -1,9 +1,13 @@
 package com.amitrangralabs.stockinsights.adapter.out.config;
 
 import com.amitrangralabs.stockinsights.adapter.out.client.FinnhubClient;
+import com.amitrangralabs.stockinsights.adapter.out.client.H2PriceHistoryRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2RepositoryClient;
+import com.amitrangralabs.stockinsights.adapter.out.client.YahooFinanceClient;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -36,9 +40,34 @@ public class OutboundConfig {
         return new FinnhubClient(finnhubRestClient, apiKey);
     }
 
-    /** The local cache, backed by H2 through {@link JdbcClient} (auto-configured by Boot). */
+    /** The local quote/profile cache, backed by H2 through {@link JdbcClient}. */
     @Bean
     public MarketDataRepositoryPort marketDataRepositoryPort(JdbcClient jdbcClient) {
         return new H2RepositoryClient(jdbcClient);
+    }
+
+    /** A {@link RestClient} for Yahoo Finance, with a browser-like User-Agent (Yahoo requires one). */
+    @Bean
+    public RestClient yahooRestClient(RestClient.Builder builder, Environment env) {
+        String baseUrl = env.getProperty(
+                "stock-insights.market-data.yahoo.base-url", "https://query1.finance.yahoo.com");
+        return builder
+                .baseUrl(baseUrl)
+                .defaultHeader("User-Agent", "Mozilla/5.0 (stock-insights)")
+                .build();
+    }
+
+    /** The price-history provider (keyless). Swap the implementation here to change providers. */
+    @Bean
+    public PriceHistoryPort priceHistoryPort(RestClient yahooRestClient, Environment env) {
+        String range = env.getProperty("stock-insights.market-data.yahoo.range", "3mo");
+        String interval = env.getProperty("stock-insights.market-data.yahoo.interval", "1d");
+        return new YahooFinanceClient(yahooRestClient, range, interval);
+    }
+
+    /** The local price-history cache, backed by H2 through {@link JdbcClient}. */
+    @Bean
+    public PriceHistoryRepositoryPort priceHistoryRepositoryPort(JdbcClient jdbcClient) {
+        return new H2PriceHistoryRepository(jdbcClient);
     }
 }

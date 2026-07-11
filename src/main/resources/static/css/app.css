@@ -107,3 +107,82 @@ table.quotes td.up {
 table.quotes td.down {
     color: #dc2626;
 }
+
+table.quotes .ticker a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+table.quotes .ticker a:hover {
+    text-decoration: underline;
+}
+
+/* --- Stock detail page --- */
+.ticker-badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    border-radius: 6px;
+    padding: 0.1rem 0.45rem;
+    vertical-align: middle;
+    margin-left: 0.4rem;
+}
+
+.quote-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0.5rem 0 1.5rem;
+}
+
+.quote-summary .price {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-summary .change {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.quote-summary .change.up {
+    color: #16a34a;
+}
+
+.quote-summary .change.down {
+    color: #dc2626;
+}
+
+.chart-card {
+    margin: 1.5rem 0;
+}
+
+.chart-card h2,
+.profile h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+#price-chart {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+}
+
+dl.facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1.25rem;
+    margin: 0;
+}
+
+dl.facts dt {
+    color: var(--muted);
+}
+
+dl.facts dd {
+    margin: 0;
+    word-break: break-word;
+}
