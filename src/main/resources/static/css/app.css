@@ -165,10 +165,85 @@ table.quotes .ticker a:hover {
     margin-bottom: 0.5rem;
 }
 
+.chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.range-bar {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.range-bar[hidden] {
+    display: none;
+}
+
+.range-btn {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+    background: transparent;
+    color: var(--fg);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.range-btn:hover {
+    border-color: var(--accent);
+}
+
+.range-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.chart-wrap {
+    position: relative;
+    width: 100%;
+}
+
 #price-chart {
     width: 100%;
     max-width: 100%;
     display: block;
+    cursor: crosshair;
+}
+
+.chart-tooltip[hidden] {
+    display: none;
+}
+
+.chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    transform: translateY(-4px);
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 2;
+}
+
+.chart-tooltip .tt-price {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-tooltip .tt-date {
+    opacity: 0.8;
+    font-size: 0.72rem;
 }
 
 dl.facts {

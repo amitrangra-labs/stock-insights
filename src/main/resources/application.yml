@@ -38,10 +38,11 @@ stock-insights:
     finnhub:
       base-url: https://finnhub.io/api/v1
       api-key: ${FINNHUB_API_KEY:}
-    # Daily price history (keyless). range: 1mo/3mo/6mo/1y/5y ; interval: 1d/1wk/1mo.
+    # Daily price history (keyless). We cache the full 5y window so the detail-page
+    # chart can zoom from 1 month out to 5 years without any extra fetch.
     yahoo:
       base-url: https://query1.finance.yahoo.com
-      range: 3mo
+      range: 5y
       interval: 1d
     alpha-vantage:
       base-url: https://www.alphavantage.co/query

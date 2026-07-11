@@ -30,10 +30,16 @@
 
         <!-- Price history chart (rendered client-side from the JSON API, no external libs) -->
         <section class="chart-card">
-            <h2>Price history</h2>
-            <canvas id="price-chart" height="320" th:attr="data-ticker=${detail.ticker}">
-                Your browser does not support the canvas element.
-            </canvas>
+            <div class="chart-head">
+                <h2>Price history</h2>
+                <div id="chart-ranges" class="range-bar" role="group" aria-label="Zoom range"></div>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="price-chart" height="320" th:attr="data-ticker=${detail.ticker}">
+                    Your browser does not support the canvas element.
+                </canvas>
+                <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+            </div>
             <p id="chart-empty" class="muted" hidden>No price history cached yet.</p>
         </section>
 
