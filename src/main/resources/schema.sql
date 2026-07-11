@@ -42,3 +42,38 @@ CREATE TABLE IF NOT EXISTS price_history (
     volume      BIGINT      NOT NULL,
     PRIMARY KEY (ticker, trade_date)
 );
+
+-- Recent company news, one row per (ticker, article id).
+CREATE TABLE IF NOT EXISTS news (
+    ticker       VARCHAR(16)  NOT NULL,
+    id           BIGINT       NOT NULL,
+    headline     VARCHAR(1024),
+    source       VARCHAR(256),
+    url          VARCHAR(1024),
+    summary      VARCHAR(4096),
+    published_at BIGINT       NOT NULL,  -- epoch millis
+    image_url    VARCHAR(1024),
+    PRIMARY KEY (ticker, id)
+);
+
+-- Latest analyst recommendation counts, one row per ticker.
+CREATE TABLE IF NOT EXISTS analyst_ratings (
+    ticker      VARCHAR(16) PRIMARY KEY,
+    period      DATE,
+    strong_buy  INT NOT NULL,
+    buy         INT NOT NULL,
+    hold        INT NOT NULL,
+    sell        INT NOT NULL,
+    strong_sell INT NOT NULL
+);
+
+-- Key fundamental metrics, one row per ticker (nullable metrics).
+CREATE TABLE IF NOT EXISTS fundamentals (
+    ticker         VARCHAR(16) PRIMARY KEY,
+    pe_ratio       DOUBLE,
+    eps            DOUBLE,
+    high_52w       DOUBLE,
+    low_52w        DOUBLE,
+    dividend_yield DOUBLE,
+    beta           DOUBLE
+);

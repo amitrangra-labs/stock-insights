@@ -2,7 +2,10 @@ package com.amitrangralabs.stockinsights.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.amitrangralabs.stockinsights.domain.object.AnalystRating;
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
+import com.amitrangralabs.stockinsights.domain.object.Fundamentals;
+import com.amitrangralabs.stockinsights.domain.object.NewsItem;
 import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
@@ -43,6 +46,21 @@ class MarketDataRefreshServiceTest {
             public CompanyProfile fetchProfile(String ticker) {
                 if (failing.contains(ticker)) throw new MarketDataException("boom");
                 return profile(ticker);
+            }
+
+            @Override
+            public List<NewsItem> fetchNews(String ticker) {
+                return List.of();
+            }
+
+            @Override
+            public AnalystRating fetchRatings(String ticker) {
+                return new AnalystRating(LocalDate.of(2026, 1, 1), 1, 2, 3, 0, 0);
+            }
+
+            @Override
+            public Fundamentals fetchFundamentals(String ticker) {
+                return new Fundamentals(ticker, 25.0, 6.0, 200.0, 150.0, 0.5, 1.1);
             }
         };
     }

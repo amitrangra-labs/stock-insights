@@ -2,7 +2,10 @@ package com.amitrangralabs.stockinsights.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.amitrangralabs.stockinsights.domain.object.AnalystRating;
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
+import com.amitrangralabs.stockinsights.domain.object.Fundamentals;
+import com.amitrangralabs.stockinsights.domain.object.NewsItem;
 import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.domain.object.StockDetail;
@@ -21,6 +24,11 @@ class StockDetailServiceTest {
         cache.saveQuote(new Quote("AAPL", 180, 1, 0.5, 181, 179, 180, 179,
                 Instant.parse("2026-01-02T15:00:00Z")));
         cache.saveProfile(new CompanyProfile("AAPL", "Apple Inc", "NASDAQ", "USD", "Tech", 3_000_000, "", ""));
+        cache.saveFundamentals(new Fundamentals("AAPL", 28.0, 6.0, 320.0, 210.0, 0.5, 1.2));
+        cache.saveRating("AAPL", new AnalystRating(LocalDate.of(2026, 6, 1), 10, 15, 5, 2, 1));
+        cache.saveNews("AAPL", List.of(new NewsItem(
+                1L, "Apple news", "WSJ", "https://x", "summary",
+                Instant.parse("2026-06-30T12:00:00Z"), "")));
         var histRepo = new FakePriceHistoryRepository();
         histRepo.saveHistory("AAPL", List.of(
                 new PricePoint(LocalDate.of(2026, 1, 1), 178, 181, 177, 179, 1_000_000),
@@ -39,6 +47,12 @@ class StockDetailServiceTest {
         assertThat(d.hasProfile()).isTrue();
         assertThat(d.hasHistory()).isTrue();
         assertThat(d.history()).hasSize(2);
+        assertThat(d.hasFundamentals()).isTrue();
+        assertThat(d.fundamentals().peRatio()).isEqualTo(28.0);
+        assertThat(d.hasRating()).isTrue();
+        assertThat(d.rating().total()).isEqualTo(33);
+        assertThat(d.hasNews()).isTrue();
+        assertThat(d.news().get(0).headline()).isEqualTo("Apple news");
     }
 
     @Test

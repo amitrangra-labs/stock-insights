@@ -324,3 +324,113 @@ dl.facts dd {
     margin: 0;
     word-break: break-word;
 }
+
+/* Fundamentals grid */
+dl.facts--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem 1.5rem;
+}
+
+dl.facts--grid > div {
+    display: flex;
+    flex-direction: column;
+}
+
+dl.facts--grid dt {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+dl.facts--grid dd {
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Analyst ratings */
+.ratings,
+.fundamentals,
+.news {
+    margin: 1.75rem 0;
+}
+
+.rating-bar {
+    display: flex;
+    width: 100%;
+    height: 18px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.rating-bar .seg {
+    height: 100%;
+}
+
+.seg.strong-buy, .dot.strong-buy { background: #15803d; }
+.seg.buy,        .dot.buy        { background: #4ade80; }
+.seg.hold,       .dot.hold       { background: #a1a1aa; }
+.seg.sell,       .dot.sell       { background: #f87171; }
+.seg.strong-sell,.dot.strong-sell{ background: #b91c1c; }
+
+.rating-legend {
+    list-style: none;
+    padding: 0;
+    margin: 0.6rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.rating-legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.rating-legend b {
+    color: var(--fg);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* News */
+.news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.news-list li {
+    border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+    padding-bottom: 0.9rem;
+}
+
+.news-list a {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--accent);
+}
+
+.news-list a:hover {
+    text-decoration: underline;
+}
+
+.news-meta {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-top: 0.25rem;
+}

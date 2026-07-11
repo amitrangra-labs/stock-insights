@@ -60,6 +60,55 @@
             </dl>
         </section>
         <p class="muted" th:unless="${detail.hasProfile()}">No company profile cached yet.</p>
+
+        <!-- Fundamentals -->
+        <section class="fundamentals" th:if="${detail.hasFundamentals()}">
+            <h2>Fundamentals</h2>
+            <dl class="facts facts--grid">
+                <div><dt>P/E (TTM)</dt><dd th:text="${detail.fundamentals.peRatio != null} ? ${#numbers.formatDecimal(detail.fundamentals.peRatio,1,2)} : '—'">—</dd></div>
+                <div><dt>EPS (TTM)</dt><dd th:text="${detail.fundamentals.eps != null} ? ${#numbers.formatDecimal(detail.fundamentals.eps,1,2)} : '—'">—</dd></div>
+                <div><dt>52-wk high</dt><dd th:text="${detail.fundamentals.high52Week != null} ? ${#numbers.formatDecimal(detail.fundamentals.high52Week,1,2)} : '—'">—</dd></div>
+                <div><dt>52-wk low</dt><dd th:text="${detail.fundamentals.low52Week != null} ? ${#numbers.formatDecimal(detail.fundamentals.low52Week,1,2)} : '—'">—</dd></div>
+                <div><dt>Div. yield</dt><dd th:text="${detail.fundamentals.dividendYield != null} ? (${#numbers.formatDecimal(detail.fundamentals.dividendYield,1,2)} + '%') : '—'">—</dd></div>
+                <div><dt>Beta</dt><dd th:text="${detail.fundamentals.beta != null} ? ${#numbers.formatDecimal(detail.fundamentals.beta,1,2)} : '—'">—</dd></div>
+            </dl>
+        </section>
+
+        <!-- Analyst ratings -->
+        <section class="ratings" th:if="${detail.hasRating()}">
+            <h2>Analyst ratings
+                <span class="muted" th:if="${detail.rating.period != null}"
+                      th:text="'(' + ${detail.rating.periodDisplay()} + ')'">(Jan 2026)</span>
+            </h2>
+            <div class="rating-bar" role="img" aria-label="Analyst recommendation distribution">
+                <span class="seg strong-buy" th:styleappend="'width:' + ${detail.rating.percent(detail.rating.strongBuy)} + '%'" th:title="'Strong buy: ' + ${detail.rating.strongBuy}"></span>
+                <span class="seg buy" th:styleappend="'width:' + ${detail.rating.percent(detail.rating.buy)} + '%'" th:title="'Buy: ' + ${detail.rating.buy}"></span>
+                <span class="seg hold" th:styleappend="'width:' + ${detail.rating.percent(detail.rating.hold)} + '%'" th:title="'Hold: ' + ${detail.rating.hold}"></span>
+                <span class="seg sell" th:styleappend="'width:' + ${detail.rating.percent(detail.rating.sell)} + '%'" th:title="'Sell: ' + ${detail.rating.sell}"></span>
+                <span class="seg strong-sell" th:styleappend="'width:' + ${detail.rating.percent(detail.rating.strongSell)} + '%'" th:title="'Strong sell: ' + ${detail.rating.strongSell}"></span>
+            </div>
+            <ul class="rating-legend">
+                <li><span class="dot strong-buy"></span>Strong buy <b th:text="${detail.rating.strongBuy}">0</b></li>
+                <li><span class="dot buy"></span>Buy <b th:text="${detail.rating.buy}">0</b></li>
+                <li><span class="dot hold"></span>Hold <b th:text="${detail.rating.hold}">0</b></li>
+                <li><span class="dot sell"></span>Sell <b th:text="${detail.rating.sell}">0</b></li>
+                <li><span class="dot strong-sell"></span>Strong sell <b th:text="${detail.rating.strongSell}">0</b></li>
+            </ul>
+        </section>
+
+        <!-- Recent news -->
+        <section class="news" th:if="${detail.hasNews()}">
+            <h2>Recent news</h2>
+            <ul class="news-list">
+                <li th:each="item : ${detail.news}">
+                    <a th:href="${item.url}" rel="noopener noreferrer" target="_blank" th:text="${item.headline}">Headline</a>
+                    <div class="news-meta">
+                        <span th:text="${item.source}">Source</span>
+                        <span th:text="${item.publishedDisplay()}">2026-01-01</span>
+                    </div>
+                </li>
+            </ul>
+        </section>
     </main>
 
     <script th:src="@{/js/price-chart.js}"></script>

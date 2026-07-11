@@ -1,6 +1,9 @@
 package com.amitrangralabs.stockinsights.domain.service;
 
+import com.amitrangralabs.stockinsights.domain.object.AnalystRating;
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
+import com.amitrangralabs.stockinsights.domain.object.Fundamentals;
+import com.amitrangralabs.stockinsights.domain.object.NewsItem;
 import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
@@ -66,10 +69,13 @@ public class MarketDataRefreshService {
             if (refreshHistory(ticker)) {
                 histories++;
             }
+            refreshNews(ticker);
+            refreshRatings(ticker);
+            refreshFundamentals(ticker);
         }
         int n = tickers.size();
-        log.info("Refresh complete: {}/{} quotes, {}/{} profiles, {}/{} histories updated.",
-                quotes, n, profiles, n, histories, n);
+        log.info("Refresh complete: {}/{} quotes, {}/{} profiles, {}/{} histories updated "
+                + "(plus news/ratings/fundamentals where available).", quotes, n, profiles, n, histories, n);
     }
 
     /** Refresh a single ticker (used right after it is added to the watchlist). Never throws. */
@@ -78,6 +84,9 @@ public class MarketDataRefreshService {
         refreshQuote(ticker);
         refreshProfile(ticker);
         refreshHistory(ticker);
+        refreshNews(ticker);
+        refreshRatings(ticker);
+        refreshFundamentals(ticker);
     }
 
     private boolean refreshQuote(String ticker) {
@@ -110,6 +119,33 @@ public class MarketDataRefreshService {
         } catch (RuntimeException e) {
             log.warn("Could not refresh history for {}: {}", ticker, e.getMessage());
             return false;
+        }
+    }
+
+    private void refreshNews(String ticker) {
+        try {
+            List<NewsItem> news = marketData.fetchNews(ticker);
+            repository.saveNews(ticker, news);
+        } catch (RuntimeException e) {
+            log.warn("Could not refresh news for {}: {}", ticker, e.getMessage());
+        }
+    }
+
+    private void refreshRatings(String ticker) {
+        try {
+            AnalystRating rating = marketData.fetchRatings(ticker);
+            repository.saveRating(ticker, rating);
+        } catch (RuntimeException e) {
+            log.warn("Could not refresh ratings for {}: {}", ticker, e.getMessage());
+        }
+    }
+
+    private void refreshFundamentals(String ticker) {
+        try {
+            Fundamentals fundamentals = marketData.fetchFundamentals(ticker);
+            repository.saveFundamentals(fundamentals);
+        } catch (RuntimeException e) {
+            log.warn("Could not refresh fundamentals for {}: {}", ticker, e.getMessage());
         }
     }
 }

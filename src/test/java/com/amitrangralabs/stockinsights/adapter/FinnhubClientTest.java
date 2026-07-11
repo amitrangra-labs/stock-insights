@@ -87,4 +87,61 @@ class FinnhubClientTest {
                 .isInstanceOf(MarketDataException.class)
                 .hasMessageContaining("FINNHUB_API_KEY");
     }
+
+    @Test
+    void mapsNewsSortedNewestFirstSkippingBlankHeadlines() {
+        var holder = new MockRestServiceServer[1];
+        FinnhubClient client = clientBoundTo(holder);
+        holder[0].expect(requestTo(Matchers.containsString("/company-news?symbol=AAPL")))
+                .andRespond(withSuccess(
+                        "[{\"id\":1,\"headline\":\"Older\",\"source\":\"Reuters\",\"url\":\"u1\","
+                                + "\"summary\":\"s1\",\"datetime\":1700000000,\"image\":\"i1\"},"
+                                + "{\"id\":2,\"headline\":\"Newer\",\"source\":\"WSJ\",\"url\":\"u2\","
+                                + "\"summary\":\"s2\",\"datetime\":1800000000,\"image\":\"\"},"
+                                + "{\"id\":3,\"headline\":\"\",\"source\":\"X\",\"url\":\"u3\","
+                                + "\"summary\":\"\",\"datetime\":1900000000,\"image\":\"\"}]",
+                        MediaType.APPLICATION_JSON));
+
+        var news = client.fetchNews("AAPL");
+
+        assertThat(news).hasSize(2); // blank headline dropped
+        assertThat(news.get(0).headline()).isEqualTo("Newer"); // newest first
+        assertThat(news.get(1).headline()).isEqualTo("Older");
+        assertThat(news.get(0).source()).isEqualTo("WSJ");
+    }
+
+    @Test
+    void mapsLatestAnalystRating() {
+        var holder = new MockRestServiceServer[1];
+        FinnhubClient client = clientBoundTo(holder);
+        holder[0].expect(requestTo(Matchers.containsString("/stock/recommendation?symbol=AAPL")))
+                .andRespond(withSuccess(
+                        "[{\"period\":\"2026-06-01\",\"strongBuy\":10,\"buy\":15,\"hold\":5,\"sell\":2,\"strongSell\":1},"
+                                + "{\"period\":\"2026-05-01\",\"strongBuy\":8,\"buy\":12,\"hold\":6,\"sell\":3,\"strongSell\":1}]",
+                        MediaType.APPLICATION_JSON));
+
+        var rating = client.fetchRatings("AAPL");
+
+        assertThat(rating.period().toString()).isEqualTo("2026-06-01"); // most-recent element
+        assertThat(rating.strongBuy()).isEqualTo(10);
+        assertThat(rating.total()).isEqualTo(33);
+    }
+
+    @Test
+    void mapsFundamentalsAndToleratesMissingMetrics() {
+        var holder = new MockRestServiceServer[1];
+        FinnhubClient client = clientBoundTo(holder);
+        holder[0].expect(requestTo(Matchers.containsString("/stock/metric?symbol=AAPL&metric=all")))
+                .andRespond(withSuccess(
+                        "{\"metric\":{\"peTTM\":28.5,\"epsTTM\":6.2,\"52WeekHigh\":320.1,"
+                                + "\"52WeekLow\":210.0,\"beta\":1.2}}", // dividendYield absent
+                        MediaType.APPLICATION_JSON));
+
+        var f = client.fetchFundamentals("AAPL");
+
+        assertThat(f.peRatio()).isEqualTo(28.5);
+        assertThat(f.high52Week()).isEqualTo(320.1);
+        assertThat(f.beta()).isEqualTo(1.2);
+        assertThat(f.dividendYield()).isNull(); // missing metric -> null, not a crash
+    }
 }

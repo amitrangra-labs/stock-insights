@@ -7,8 +7,22 @@ curated set of tickers.
 Built with **Spring Boot + Thymeleaf** using a **Domain / Port / Adapter** (hexagonal)
 architecture with **explicit Spring wiring** (no `@Autowired`, no stereotype scanning).
 
-> Status: M2 — dashboard plus per-stock detail pages with a price-history chart.
-> Everything is served from a background-refreshed local cache.
+> Status: M3 — an editable watchlist dashboard and rich per-stock detail pages
+> (interactive price chart, fundamentals, analyst ratings, news). Everything is
+> served from a background-refreshed local cache.
+
+## Features
+
+- **Dashboard** of tracked tickers; **add/remove tickers from the UI** (watchlist
+  persisted in H2; adding a ticker fetches its data immediately).
+- **Stock detail page** per ticker:
+  - **Interactive price chart** — hover for a date/price tooltip, zoom the range
+    from 1 month out to 5 years. Dependency-free (no charting library, works offline).
+  - **Fundamentals** (P/E, EPS, 52-week high/low, dividend yield, beta).
+  - **Analyst ratings** distribution (strong buy → strong sell).
+  - **Recent company news**.
+- **Background refresh** into a local cache, so pages never call the APIs directly
+  and stay within free-tier limits. Missing data degrades gracefully to placeholders.
 
 ## Quick start
 
@@ -95,8 +109,8 @@ with a Spring env var, e.g. `-e STOCK_INSIGHTS_REFRESH_INTERVAL_MS=60000`.
 Stock data comes from free APIs behind port interfaces, so providers can be swapped
 without touching the domain:
 
-- **[Finnhub](https://finnhub.io/register)** (`MarketDataPort`) — quotes and company
-  profiles. Needs a free API key.
+- **[Finnhub](https://finnhub.io/register)** (`MarketDataPort`) — quotes, company
+  profiles, fundamentals, analyst ratings, and company news. Needs a free API key.
 - **Yahoo Finance chart API** (`PriceHistoryPort`) — daily price history. Keyless, so the
   chart works out of the box. Unofficial endpoint; swap behind the port for a licensed
   feed if needed.

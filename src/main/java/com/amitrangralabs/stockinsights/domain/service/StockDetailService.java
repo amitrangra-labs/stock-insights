@@ -42,7 +42,10 @@ public class StockDetailService {
                 canonical,
                 marketDataRepository.findProfile(canonical).orElse(null),
                 marketDataRepository.findLatestQuote(canonical).orElse(null),
-                priceHistoryRepository.findHistory(canonical)));
+                priceHistoryRepository.findHistory(canonical),
+                marketDataRepository.findFundamentals(canonical).orElse(null),
+                marketDataRepository.findRating(canonical).orElse(null),
+                marketDataRepository.findNews(canonical)));
     }
 
     /** Cached daily history for a tracked ticker (empty if not tracked or nothing cached). */

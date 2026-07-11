@@ -1,9 +1,14 @@
 package com.amitrangralabs.stockinsights.adapter.out.client;
 
+import com.amitrangralabs.stockinsights.domain.object.AnalystRating;
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
+import com.amitrangralabs.stockinsights.domain.object.Fundamentals;
+import com.amitrangralabs.stockinsights.domain.object.NewsItem;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
@@ -69,6 +74,64 @@ public class H2RepositoryClient implements MarketDataRepositoryPort {
     }
 
     @Override
+    public void saveNews(String ticker, List<NewsItem> news) {
+        // Replace the ticker's news so the cache reflects the latest fetch (bounded size).
+        jdbc.sql("DELETE FROM news WHERE ticker = :ticker").param("ticker", ticker).update();
+        for (NewsItem n : news) {
+            jdbc.sql("""
+                    INSERT INTO news
+                        (ticker, id, headline, source, url, summary, published_at, image_url)
+                    VALUES (:ticker, :id, :headline, :source, :url, :summary, :publishedAt, :imageUrl)
+                    """)
+                    .param("ticker", ticker)
+                    .param("id", n.id())
+                    .param("headline", n.headline())
+                    .param("source", n.source())
+                    .param("url", n.url())
+                    .param("summary", n.summary())
+                    .param("publishedAt", n.publishedAt().toEpochMilli())
+                    .param("imageUrl", n.imageUrl())
+                    .update();
+        }
+    }
+
+    @Override
+    public void saveRating(String ticker, AnalystRating r) {
+        jdbc.sql("""
+                MERGE INTO analyst_ratings
+                    (ticker, period, strong_buy, buy, hold, sell, strong_sell)
+                KEY (ticker)
+                VALUES (:ticker, :period, :strongBuy, :buy, :hold, :sell, :strongSell)
+                """)
+                .param("ticker", ticker)
+                .param("period", r.period())
+                .param("strongBuy", r.strongBuy())
+                .param("buy", r.buy())
+                .param("hold", r.hold())
+                .param("sell", r.sell())
+                .param("strongSell", r.strongSell())
+                .update();
+    }
+
+    @Override
+    public void saveFundamentals(Fundamentals f) {
+        jdbc.sql("""
+                MERGE INTO fundamentals
+                    (ticker, pe_ratio, eps, high_52w, low_52w, dividend_yield, beta)
+                KEY (ticker)
+                VALUES (:ticker, :pe, :eps, :high, :low, :dividendYield, :beta)
+                """)
+                .param("ticker", f.ticker())
+                .param("pe", f.peRatio())
+                .param("eps", f.eps())
+                .param("high", f.high52Week())
+                .param("low", f.low52Week())
+                .param("dividendYield", f.dividendYield())
+                .param("beta", f.beta())
+                .update();
+    }
+
+    @Override
     public Optional<Quote> findLatestQuote(String ticker) {
         return jdbc.sql("""
                 SELECT ticker, current_price, price_change, percent_change,
@@ -105,6 +168,59 @@ public class H2RepositoryClient implements MarketDataRepositoryPort {
                         rs.getDouble("market_cap"),
                         rs.getString("logo_url"),
                         rs.getString("web_url")))
+                .optional();
+    }
+
+    @Override
+    public List<NewsItem> findNews(String ticker) {
+        return jdbc.sql("""
+                SELECT id, headline, source, url, summary, published_at, image_url
+                FROM news WHERE ticker = :ticker ORDER BY published_at DESC
+                """)
+                .param("ticker", ticker)
+                .query((rs, rowNum) -> new NewsItem(
+                        rs.getLong("id"),
+                        rs.getString("headline"),
+                        rs.getString("source"),
+                        rs.getString("url"),
+                        rs.getString("summary"),
+                        Instant.ofEpochMilli(rs.getLong("published_at")),
+                        rs.getString("image_url")))
+                .list();
+    }
+
+    @Override
+    public Optional<AnalystRating> findRating(String ticker) {
+        return jdbc.sql("""
+                SELECT period, strong_buy, buy, hold, sell, strong_sell
+                FROM analyst_ratings WHERE ticker = :ticker
+                """)
+                .param("ticker", ticker)
+                .query((rs, rowNum) -> new AnalystRating(
+                        rs.getObject("period", LocalDate.class),
+                        rs.getInt("strong_buy"),
+                        rs.getInt("buy"),
+                        rs.getInt("hold"),
+                        rs.getInt("sell"),
+                        rs.getInt("strong_sell")))
+                .optional();
+    }
+
+    @Override
+    public Optional<Fundamentals> findFundamentals(String ticker) {
+        return jdbc.sql("""
+                SELECT ticker, pe_ratio, eps, high_52w, low_52w, dividend_yield, beta
+                FROM fundamentals WHERE ticker = :ticker
+                """)
+                .param("ticker", ticker)
+                .query((rs, rowNum) -> new Fundamentals(
+                        rs.getString("ticker"),
+                        (Double) rs.getObject("pe_ratio"),
+                        (Double) rs.getObject("eps"),
+                        (Double) rs.getObject("high_52w"),
+                        (Double) rs.getObject("low_52w"),
+                        (Double) rs.getObject("dividend_yield"),
+                        (Double) rs.getObject("beta")))
                 .optional();
     }
 }
