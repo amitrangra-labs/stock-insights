@@ -108,6 +108,69 @@ table.quotes td.down {
     color: #dc2626;
 }
 
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.add-ticker {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.add-ticker input {
+    font: inherit;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--fg);
+    min-width: 16rem;
+    text-transform: uppercase;
+}
+
+.add-ticker button {
+    font: inherit;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+}
+
+table.quotes td.actions {
+    text-align: right;
+    width: 1%;
+}
+
+table.quotes td.actions form {
+    margin: 0;
+}
+
+.remove-btn {
+    font: inherit;
+    line-height: 1;
+    font-size: 1.1rem;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.remove-btn:hover {
+    color: #dc2626;
+    border-color: color-mix(in srgb, #dc2626 40%, transparent);
+}
+
 table.quotes .ticker a {
     color: var(--accent);
     text-decoration: none;

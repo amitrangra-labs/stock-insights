@@ -25,7 +25,7 @@ class StockDetailServiceTest {
         histRepo.saveHistory("AAPL", List.of(
                 new PricePoint(LocalDate.of(2026, 1, 1), 178, 181, 177, 179, 1_000_000),
                 new PricePoint(LocalDate.of(2026, 1, 2), 179, 182, 178, 180, 1_200_000)));
-        return new StockDetailService(cache, histRepo, List.of("AAPL", "MSFT"));
+        return new StockDetailService(cache, histRepo, new FakeWatchlist("AAPL", "MSFT"));
     }
 
     @Test
@@ -57,7 +57,7 @@ class StockDetailServiceTest {
     @Test
     void trackedTickerWithNoCachedDataStillReturnsDetail() {
         var service = new StockDetailService(
-                new FakeMarketDataRepository(), new FakePriceHistoryRepository(), List.of("MSFT"));
+                new FakeMarketDataRepository(), new FakePriceHistoryRepository(), new FakeWatchlist("MSFT"));
 
         Optional<StockDetail> detail = service.getDetail("MSFT");
 

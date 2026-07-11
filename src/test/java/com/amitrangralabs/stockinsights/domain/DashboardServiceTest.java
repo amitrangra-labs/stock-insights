@@ -21,7 +21,7 @@ class DashboardServiceTest {
         repo.saveProfile(new CompanyProfile("MSFT", "Microsoft Corp", "NASDAQ", "USD",
                 "Tech", 3_000_000, "", ""));
 
-        var service = new DashboardService(repo, List.of("AAPL", "MSFT"));
+        var service = new DashboardService(repo, new FakeWatchlist("AAPL", "MSFT"));
         List<DashboardRow> rows = service.getDashboard();
 
         assertThat(rows).extracting(DashboardRow::ticker).containsExactly("AAPL", "MSFT");
@@ -38,7 +38,7 @@ class DashboardServiceTest {
     @Test
     void tickerWithNoCachedDataStillGetsAPlaceholderRow() {
         var repo = new FakeMarketDataRepository();
-        var service = new DashboardService(repo, List.of("AAPL"));
+        var service = new DashboardService(repo, new FakeWatchlist("AAPL"));
 
         DashboardRow row = service.getDashboard().get(0);
 
@@ -54,7 +54,7 @@ class DashboardServiceTest {
         var repo = new FakeMarketDataRepository();
         repo.saveQuote(new Quote("AAPL", 180, -1.5, -0.8, 182, 179, 181,
                 181.5, Instant.parse("2026-01-02T15:00:00Z")));
-        var service = new DashboardService(repo, List.of("AAPL"));
+        var service = new DashboardService(repo, new FakeWatchlist("AAPL"));
 
         assertThat(service.getDashboard().get(0).isUp()).isFalse();
     }

@@ -3,11 +3,13 @@ package com.amitrangralabs.stockinsights.adapter.out.config;
 import com.amitrangralabs.stockinsights.adapter.out.client.FinnhubClient;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2PriceHistoryRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2RepositoryClient;
+import com.amitrangralabs.stockinsights.adapter.out.client.H2WatchlistRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.YahooFinanceClient;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
+import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -69,5 +71,11 @@ public class OutboundConfig {
     @Bean
     public PriceHistoryRepositoryPort priceHistoryRepositoryPort(JdbcClient jdbcClient) {
         return new H2PriceHistoryRepository(jdbcClient);
+    }
+
+    /** The persisted watchlist, backed by H2 through {@link JdbcClient}. */
+    @Bean
+    public WatchlistPort watchlistPort(JdbcClient jdbcClient) {
+        return new H2WatchlistRepository(jdbcClient);
     }
 }

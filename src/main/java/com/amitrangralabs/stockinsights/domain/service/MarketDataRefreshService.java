@@ -7,6 +7,7 @@ import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
+import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,32 +30,33 @@ public class MarketDataRefreshService {
     private final MarketDataRepositoryPort repository;
     private final PriceHistoryPort priceHistory;
     private final PriceHistoryRepositoryPort priceHistoryRepository;
-    private final List<String> trackedTickers;
+    private final WatchlistPort watchlist;
 
     public MarketDataRefreshService(
             MarketDataPort marketData,
             MarketDataRepositoryPort repository,
             PriceHistoryPort priceHistory,
             PriceHistoryRepositoryPort priceHistoryRepository,
-            List<String> trackedTickers) {
+            WatchlistPort watchlist) {
         this.marketData = marketData;
         this.repository = repository;
         this.priceHistory = priceHistory;
         this.priceHistoryRepository = priceHistoryRepository;
-        this.trackedTickers = List.copyOf(trackedTickers);
+        this.watchlist = watchlist;
     }
 
     /** Refresh quote, profile, and price history for every tracked ticker. Never throws. */
     public void refreshAll() {
-        if (trackedTickers.isEmpty()) {
-            log.info("No tracked tickers configured; nothing to refresh.");
+        List<String> tickers = watchlist.list();
+        if (tickers.isEmpty()) {
+            log.info("Watchlist is empty; nothing to refresh.");
             return;
         }
-        log.info("Refreshing market data for {} ticker(s): {}", trackedTickers.size(), trackedTickers);
+        log.info("Refreshing market data for {} ticker(s): {}", tickers.size(), tickers);
         int quotes = 0;
         int profiles = 0;
         int histories = 0;
-        for (String ticker : trackedTickers) {
+        for (String ticker : tickers) {
             if (refreshQuote(ticker)) {
                 quotes++;
             }
@@ -65,9 +67,17 @@ public class MarketDataRefreshService {
                 histories++;
             }
         }
-        int n = trackedTickers.size();
+        int n = tickers.size();
         log.info("Refresh complete: {}/{} quotes, {}/{} profiles, {}/{} histories updated.",
                 quotes, n, profiles, n, histories, n);
+    }
+
+    /** Refresh a single ticker (used right after it is added to the watchlist). Never throws. */
+    public void refreshTicker(String ticker) {
+        log.info("Refreshing market data for newly added ticker {}", ticker);
+        refreshQuote(ticker);
+        refreshProfile(ticker);
+        refreshHistory(ticker);
     }
 
     private boolean refreshQuote(String ticker) {

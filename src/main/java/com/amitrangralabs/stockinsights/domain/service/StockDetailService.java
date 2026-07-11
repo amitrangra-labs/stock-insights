@@ -4,6 +4,7 @@ import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.StockDetail;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
+import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,22 +14,22 @@ import java.util.Optional;
  * <p>Plain Java, framework-free. Reads profile/quote and price history through the two repository
  * ports — never the external providers — so detail-page loads are fast and rate-limit-safe.
  *
- * <p>Only tickers on the configured watchlist are served; anything else yields
- * {@link Optional#empty()} so the endpoint can return 404 rather than fetching arbitrary symbols.
+ * <p>Only tickers on the watchlist are served; anything else yields {@link Optional#empty()} so the
+ * endpoint can return 404 rather than fetching arbitrary symbols.
  */
 public class StockDetailService {
 
     private final MarketDataRepositoryPort marketDataRepository;
     private final PriceHistoryRepositoryPort priceHistoryRepository;
-    private final List<String> trackedTickers;
+    private final WatchlistPort watchlist;
 
     public StockDetailService(
             MarketDataRepositoryPort marketDataRepository,
             PriceHistoryRepositoryPort priceHistoryRepository,
-            List<String> trackedTickers) {
+            WatchlistPort watchlist) {
         this.marketDataRepository = marketDataRepository;
         this.priceHistoryRepository = priceHistoryRepository;
-        this.trackedTickers = List.copyOf(trackedTickers);
+        this.watchlist = watchlist;
     }
 
     /** Full detail (profile + quote + history) for a tracked ticker, or empty if not tracked. */
@@ -56,6 +57,6 @@ public class StockDetailService {
             return null;
         }
         String upper = ticker.toUpperCase();
-        return trackedTickers.contains(upper) ? upper : null;
+        return watchlist.contains(upper) ? upper : null;
     }
 }

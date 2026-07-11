@@ -27,7 +27,8 @@ class DashboardEndpointTest {
                 179, Instant.parse("2026-01-02T15:00:00Z")));
         repo.saveProfile(new CompanyProfile("AAPL", "Apple Inc", "NASDAQ", "USD",
                 "Tech", 3_000_000, "", ""));
-        var endpoint = new DashboardEndpoint(new DashboardService(repo, List.of("AAPL")));
+        var endpoint = new DashboardEndpoint(new DashboardService(repo,
+                new com.amitrangralabs.stockinsights.domain.FakeWatchlist("AAPL")));
 
         Model model = new ConcurrentModel();
         String view = endpoint.dashboard(model);

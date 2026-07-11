@@ -22,7 +22,8 @@ class PriceHistoryApiEndpointTest {
         var histRepo = new FakePriceHistoryRepository();
         histRepo.saveHistory("AAPL", List.of(
                 new PricePoint(LocalDate.of(2026, 1, 2), 179, 182, 178, 180, 1_200_000)));
-        return new StockDetailService(new FakeMarketDataRepository(), histRepo, List.of("AAPL"));
+        return new StockDetailService(new FakeMarketDataRepository(), histRepo,
+                new com.amitrangralabs.stockinsights.domain.FakeWatchlist("AAPL"));
     }
 
     @Test

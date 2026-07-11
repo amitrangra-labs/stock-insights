@@ -60,7 +60,7 @@ class MarketDataRefreshServiceTest {
         var histRepo = new FakePriceHistoryRepository();
         var service = new MarketDataRefreshService(
                 marketDataPort(Set.of()), repo, priceHistoryPort(Set.of()), histRepo,
-                List.of("AAPL", "MSFT"));
+                new FakeWatchlist("AAPL", "MSFT"));
 
         service.refreshAll();
 
@@ -76,7 +76,7 @@ class MarketDataRefreshServiceTest {
         var histRepo = new FakePriceHistoryRepository();
         var service = new MarketDataRefreshService(
                 marketDataPort(Set.of("BAD")), repo, priceHistoryPort(Set.of("BAD")), histRepo,
-                List.of("AAPL", "BAD", "MSFT"));
+                new FakeWatchlist("AAPL", "BAD", "MSFT"));
 
         service.refreshAll();
 
@@ -91,7 +91,7 @@ class MarketDataRefreshServiceTest {
         // Quote/profile succeed; history provider fails for everything.
         var service = new MarketDataRefreshService(
                 marketDataPort(Set.of()), repo, priceHistoryPort(Set.of("AAPL")), histRepo,
-                List.of("AAPL"));
+                new FakeWatchlist("AAPL"));
 
         service.refreshAll();
 

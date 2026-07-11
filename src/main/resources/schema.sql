@@ -1,6 +1,13 @@
 -- Cache tables for market data. Run automatically by Spring Boot on startup.
 -- "Latest wins": one row per ticker, upserted via MERGE by the persistence adapter.
 
+-- The watchlist: the set of tracked tickers, editable at runtime. Seeded from
+-- stock-insights.tracked-tickers on first start (when empty).
+CREATE TABLE IF NOT EXISTS watchlist (
+    ticker   VARCHAR(16) PRIMARY KEY,
+    added_at BIGINT NOT NULL  -- epoch millis, preserves insertion order
+);
+
 CREATE TABLE IF NOT EXISTS quotes (
     ticker         VARCHAR(16) PRIMARY KEY,
     current_price  DOUBLE      NOT NULL,

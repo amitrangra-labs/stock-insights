@@ -4,6 +4,7 @@ import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
 import com.amitrangralabs.stockinsights.domain.object.DashboardRow;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,21 +14,23 @@ import java.util.Optional;
  *
  * <p>Plain Java, framework-free. Reads through {@link MarketDataRepositoryPort} — it never calls the
  * external provider — so the page is fast and rate-limit-safe. Produces one {@link DashboardRow} per
- * tracked ticker, in configured order, filling placeholders for tickers not yet cached.
+ * ticker on the {@link WatchlistPort}, in watchlist order, filling placeholders for tickers not yet
+ * cached.
  */
 public class DashboardService {
 
     private final MarketDataRepositoryPort repository;
-    private final List<String> trackedTickers;
+    private final WatchlistPort watchlist;
 
-    public DashboardService(MarketDataRepositoryPort repository, List<String> trackedTickers) {
+    public DashboardService(MarketDataRepositoryPort repository, WatchlistPort watchlist) {
         this.repository = repository;
-        this.trackedTickers = List.copyOf(trackedTickers);
+        this.watchlist = watchlist;
     }
 
     public List<DashboardRow> getDashboard() {
-        List<DashboardRow> rows = new ArrayList<>(trackedTickers.size());
-        for (String ticker : trackedTickers) {
+        List<String> tickers = watchlist.list();
+        List<DashboardRow> rows = new ArrayList<>(tickers.size());
+        for (String ticker : tickers) {
             Optional<Quote> quote = repository.findLatestQuote(ticker);
             Optional<CompanyProfile> profile = repository.findProfile(ticker);
             rows.add(toRow(ticker, quote, profile));

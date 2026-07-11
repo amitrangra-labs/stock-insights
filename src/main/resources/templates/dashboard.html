@@ -18,6 +18,12 @@
             live market. A dash (&mdash;) means no data has been cached yet.
         </p>
 
+        <form class="add-ticker" method="post" th:action="@{/watchlist}">
+            <input type="text" name="ticker" placeholder="Add a ticker (e.g. TSLA)"
+                   aria-label="Ticker symbol" maxlength="16" autocomplete="off" required>
+            <button type="submit">Add</button>
+        </form>
+
         <table class="quotes">
             <thead>
                 <tr>
@@ -27,6 +33,7 @@
                     <th class="num">Change</th>
                     <th class="num">Change %</th>
                     <th>As of</th>
+                    <th><span class="visually-hidden">Actions</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -43,9 +50,15 @@
                         th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.percentChange,1,2)} + '%' : '—'">0.00%</td>
                     <td class="muted" th:text="${row.asOfDisplay()}">—</td>
+                    <td class="actions">
+                        <form method="post" th:action="@{/watchlist/{t}/remove(t=${row.ticker})}">
+                            <button type="submit" class="remove-btn"
+                                    th:attr="aria-label='Remove ' + ${row.ticker}" title="Remove">&times;</button>
+                        </form>
+                    </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="6" class="muted">No tickers are being tracked. Configure some in application.yml.</td>
+                    <td colspan="7" class="muted">Your watchlist is empty. Add a ticker above.</td>
                 </tr>
             </tbody>
         </table>
