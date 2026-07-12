@@ -5,7 +5,7 @@
 -- stock-insights.tracked-tickers on first start (when empty).
 CREATE TABLE IF NOT EXISTS watchlist (
     ticker   VARCHAR(16) PRIMARY KEY,
-    added_at BIGINT NOT NULL  -- epoch millis, preserves insertion order
+    added_at BIGINT NOT NULL  -- monotonic sequence, preserves insertion order
 );
 
 CREATE TABLE IF NOT EXISTS quotes (

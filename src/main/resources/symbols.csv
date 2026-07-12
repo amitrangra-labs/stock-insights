@@ -1,0 +1,113 @@
+# Bundled symbol catalog for search autocomplete (keyless — works with no API key).
+# Format: SYMBOL,Company or fund name  (split on the first comma). Lines starting with # are ignored.
+# A curated set of popular US stocks and ETFs; extend as needed.
+NVDA,NVIDIA Corporation
+AAPL,Apple Inc.
+MSFT,Microsoft Corporation
+GOOGL,Alphabet Inc. (Class A)
+GOOG,Alphabet Inc. (Class C)
+AMZN,Amazon.com Inc.
+META,Meta Platforms Inc.
+AVGO,Broadcom Inc.
+TSLA,Tesla Inc.
+ORCL,Oracle Corporation
+CRM,Salesforce Inc.
+ADBE,Adobe Inc.
+AMD,Advanced Micro Devices Inc.
+INTC,Intel Corporation
+CSCO,Cisco Systems Inc.
+QCOM,Qualcomm Inc.
+TXN,Texas Instruments Inc.
+IBM,International Business Machines
+NFLX,Netflix Inc.
+NOW,ServiceNow Inc.
+UBER,Uber Technologies Inc.
+PLTR,Palantir Technologies Inc.
+SNOW,Snowflake Inc.
+SHOP,Shopify Inc.
+MU,Micron Technology Inc.
+AMAT,Applied Materials Inc.
+LRCX,Lam Research Corporation
+INTU,Intuit Inc.
+PANW,Palo Alto Networks Inc.
+ANET,Arista Networks Inc.
+JPM,JPMorgan Chase & Co.
+BAC,Bank of America Corporation
+WFC,Wells Fargo & Company
+GS,Goldman Sachs Group Inc.
+MS,Morgan Stanley
+V,Visa Inc.
+MA,Mastercard Inc.
+AXP,American Express Company
+C,Citigroup Inc.
+SCHW,Charles Schwab Corporation
+BLK,BlackRock Inc.
+PYPL,PayPal Holdings Inc.
+LLY,Eli Lilly and Company
+UNH,UnitedHealth Group Inc.
+JNJ,Johnson & Johnson
+MRK,Merck & Co. Inc.
+ABBV,AbbVie Inc.
+PFE,Pfizer Inc.
+TMO,Thermo Fisher Scientific Inc.
+ABT,Abbott Laboratories
+DHR,Danaher Corporation
+BMY,Bristol-Myers Squibb Company
+AMGN,Amgen Inc.
+GILD,Gilead Sciences Inc.
+WMT,Walmart Inc.
+COST,Costco Wholesale Corporation
+PG,Procter & Gamble Company
+KO,Coca-Cola Company
+PEP,PepsiCo Inc.
+MCD,McDonald's Corporation
+NKE,Nike Inc.
+SBUX,Starbucks Corporation
+HD,Home Depot Inc.
+LOW,Lowe's Companies Inc.
+TGT,Target Corporation
+DIS,Walt Disney Company
+CMG,Chipotle Mexican Grill Inc.
+XOM,Exxon Mobil Corporation
+CVX,Chevron Corporation
+COP,ConocoPhillips
+BA,Boeing Company
+CAT,Caterpillar Inc.
+GE,GE Aerospace
+HON,Honeywell International Inc.
+UPS,United Parcel Service Inc.
+RTX,RTX Corporation
+LMT,Lockheed Martin Corporation
+DE,Deere & Company
+T,AT&T Inc.
+VZ,Verizon Communications Inc.
+CMCSA,Comcast Corporation
+TMUS,T-Mobile US Inc.
+F,Ford Motor Company
+GM,General Motors Company
+BRK.B,Berkshire Hathaway Inc. (Class B)
+SPY,SPDR S&P 500 ETF Trust
+VOO,Vanguard S&P 500 ETF
+IVV,iShares Core S&P 500 ETF
+VTI,Vanguard Total Stock Market ETF
+QQQ,Invesco QQQ Trust
+VEA,Vanguard FTSE Developed Markets ETF
+VUG,Vanguard Growth ETF
+VTV,Vanguard Value ETF
+BND,Vanguard Total Bond Market ETF
+GLD,SPDR Gold Shares
+AGG,iShares Core U.S. Aggregate Bond ETF
+IWM,iShares Russell 2000 ETF
+IEFA,iShares Core MSCI EAFE ETF
+IJR,iShares Core S&P Small-Cap ETF
+VIG,Vanguard Dividend Appreciation ETF
+VXUS,Vanguard Total International Stock ETF
+VWO,Vanguard FTSE Emerging Markets ETF
+SCHD,Schwab U.S. Dividend Equity ETF
+DIA,SPDR Dow Jones Industrial Average ETF
+ARKK,ARK Innovation ETF
+XLK,Technology Select Sector SPDR Fund
+XLF,Financial Select Sector SPDR Fund
+XLE,Energy Select Sector SPDR Fund
+SLV,iShares Silver Trust
+TLT,iShares 20+ Year Treasury Bond ETF

@@ -13,8 +13,10 @@ architecture with **explicit Spring wiring** (no `@Autowired`, no stereotype sca
 
 ## Features
 
-- **Dashboard** of tracked tickers; **add/remove tickers from the UI** (watchlist
-  persisted in H2; adding a ticker fetches its data immediately).
+- **Dashboard** of tracked tickers, seeded with the top 10 US large-caps + top 10 ETFs
+  on first run; **add/remove tickers from the UI** with **search autocomplete**
+  (keyless — a bundled symbol catalog, so it works with no API key). Adding a ticker
+  fetches its data immediately; the watchlist is persisted in H2.
 - **Stock detail page** per ticker:
   - **Interactive price chart** — hover for a date/price tooltip, zoom the range
     from 1 month out to 5 years. Dependency-free (no charting library, works offline).

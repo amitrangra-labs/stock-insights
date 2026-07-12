@@ -117,10 +117,63 @@ table.quotes td.down {
     white-space: nowrap;
 }
 
+.add-ticker-wrap {
+    position: relative;
+    margin: 1rem 0;
+    max-width: 22rem;
+}
+
 .add-ticker {
     display: flex;
     gap: 0.5rem;
-    margin: 1rem 0;
+}
+
+.suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background: var(--bg);
+    border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.suggestions[hidden] {
+    display: none;
+}
+
+.suggestion {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.suggestion.active,
+.suggestion:hover {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.suggestion .s-symbol {
+    font-weight: 700;
+    min-width: 3.5rem;
+}
+
+.suggestion .s-name {
+    color: var(--muted);
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .add-ticker input {
@@ -130,7 +183,8 @@ table.quotes td.down {
     border-radius: 6px;
     background: var(--bg);
     color: var(--fg);
-    min-width: 16rem;
+    flex: 1;
+    min-width: 0;
     text-transform: uppercase;
 }
 

@@ -6,10 +6,12 @@ import com.amitrangralabs.stockinsights.adapter.in.endpoint.HomeEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceHistoryApiEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.RefreshScheduler;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.StockDetailEndpoint;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.SymbolSearchEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.WatchlistEndpoint;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
 import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
+import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
@@ -76,5 +78,10 @@ public class InboundConfig {
     public WatchlistEndpoint watchlistEndpoint(
             WatchlistService watchlistService, MarketDataRefreshService marketDataRefreshService) {
         return new WatchlistEndpoint(watchlistService, marketDataRefreshService);
+    }
+
+    @Bean
+    public SymbolSearchEndpoint symbolSearchEndpoint(SymbolSearchService symbolSearchService) {
+        return new SymbolSearchEndpoint(symbolSearchService);
     }
 }

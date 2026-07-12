@@ -3,11 +3,13 @@ package com.amitrangralabs.stockinsights.domain.config;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
 import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
+import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
+import com.amitrangralabs.stockinsights.port.SymbolSearchPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.List;
 import org.slf4j.Logger;
@@ -65,6 +67,11 @@ public class DomainConfig {
     @Bean
     public WatchlistService watchlistService(WatchlistPort watchlistPort) {
         return new WatchlistService(watchlistPort);
+    }
+
+    @Bean
+    public SymbolSearchService symbolSearchService(SymbolSearchPort symbolSearchPort) {
+        return new SymbolSearchService(symbolSearchPort);
     }
 
     /**

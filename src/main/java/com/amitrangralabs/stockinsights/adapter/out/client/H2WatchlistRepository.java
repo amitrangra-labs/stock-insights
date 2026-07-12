@@ -31,9 +31,13 @@ public class H2WatchlistRepository implements WatchlistPort {
         if (contains(ticker)) {
             return false;
         }
-        jdbc.sql("INSERT INTO watchlist (ticker, added_at) VALUES (:ticker, :addedAt)")
+        // Monotonic sequence = strict insertion order, even for a fast batch (e.g. seeding),
+        // where wall-clock millis would tie. contains() above guards against duplicates.
+        jdbc.sql("""
+                INSERT INTO watchlist (ticker, added_at)
+                SELECT :ticker, COALESCE(MAX(added_at), 0) + 1 FROM watchlist
+                """)
                 .param("ticker", ticker)
-                .param("addedAt", System.currentTimeMillis())
                 .update();
         return true;
     }

@@ -1,5 +1,6 @@
 package com.amitrangralabs.stockinsights.adapter.out.config;
 
+import com.amitrangralabs.stockinsights.adapter.out.client.CatalogSymbolSearch;
 import com.amitrangralabs.stockinsights.adapter.out.client.FinnhubClient;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2PriceHistoryRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2RepositoryClient;
@@ -9,6 +10,7 @@ import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
+import com.amitrangralabs.stockinsights.port.SymbolSearchPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -77,5 +79,11 @@ public class OutboundConfig {
     @Bean
     public WatchlistPort watchlistPort(JdbcClient jdbcClient) {
         return new H2WatchlistRepository(jdbcClient);
+    }
+
+    /** Symbol search for add-ticker autocomplete, backed by the bundled catalog (keyless). */
+    @Bean
+    public SymbolSearchPort symbolSearchPort() {
+        return new CatalogSymbolSearch();
     }
 }

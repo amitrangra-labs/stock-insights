@@ -24,11 +24,31 @@ server:
 # Application-specific config. API keys are read from environment variables so they
 # are never committed. See .env.example for the full list.
 stock-insights:
-  # Small curated watchlist to start (M1). Add/remove tickers here.
+  # Seed watchlist used on first start only (the watchlist is user-editable after that).
+  # Top 10 US large-caps + top 10 ETFs. Symbols chosen to avoid dot/dash mapping issues.
   tracked-tickers:
+    # --- Stocks ---
+    - NVDA
     - AAPL
     - MSFT
-    - NVDA
+    - GOOGL
+    - AMZN
+    - META
+    - AVGO
+    - TSLA
+    - JPM
+    - WMT
+    # --- ETFs ---
+    - SPY
+    - VOO
+    - IVV
+    - VTI
+    - QQQ
+    - VEA
+    - VUG
+    - VTV
+    - BND
+    - GLD
   # Background refresh cadence (Journey A). Kept conservative to respect free-tier
   # rate limits. The initial delay lets the app finish starting before the first fetch.
   refresh-interval-ms: 300000
