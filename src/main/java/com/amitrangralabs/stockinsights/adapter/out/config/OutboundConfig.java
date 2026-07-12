@@ -2,16 +2,20 @@ package com.amitrangralabs.stockinsights.adapter.out.config;
 
 import com.amitrangralabs.stockinsights.adapter.out.client.CatalogSymbolSearch;
 import com.amitrangralabs.stockinsights.adapter.out.client.FinnhubClient;
+import com.amitrangralabs.stockinsights.adapter.out.client.FinnhubTradeStream;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2PriceHistoryRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2RepositoryClient;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2WatchlistRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.YahooFinanceClient;
+import com.amitrangralabs.stockinsights.domain.service.PriceStreamService;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import com.amitrangralabs.stockinsights.port.SymbolSearchPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -87,5 +91,24 @@ public class OutboundConfig {
     @Bean
     public SymbolSearchPort symbolSearchPort() {
         return new CatalogSymbolSearch();
+    }
+
+    /** Real-time trade stream from Finnhub's WebSocket (no-op without an API key). */
+    @Bean(destroyMethod = "close")
+    public FinnhubTradeStream finnhubTradeStream(
+            WatchlistPort watchlistPort,
+            PriceStreamService priceStreamService,
+            ObjectMapper objectMapper,
+            Environment env) {
+        String wsUrl = env.getProperty(
+                "stock-insights.market-data.finnhub.ws-url", "wss://ws.finnhub.io");
+        String apiKey = env.getProperty("stock-insights.market-data.finnhub.api-key", "");
+        return new FinnhubTradeStream(wsUrl, apiKey, watchlistPort, priceStreamService, objectMapper);
+    }
+
+    /** Starts the trade stream once the application is up. */
+    @Bean
+    public ApplicationRunner tradeStreamStarter(FinnhubTradeStream finnhubTradeStream) {
+        return args -> finnhubTradeStream.start();
     }
 }

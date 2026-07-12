@@ -18,6 +18,13 @@ architecture with **explicit Spring wiring** (no `@Autowired`, no stereotype sca
   (keyless — a bundled symbol catalog, so it works with no API key), plus a
   **Reset to defaults** button that clears the watchlist and restores the seed. Adding
   a ticker fetches its data immediately; the watchlist is persisted in H2.
+  - **Rich columns**: day range, volume, market cap and 52-week range (as position
+    bars), plus a 30-day **sparkline** per row.
+  - A **market-breadth strip** (advancing/declining + top movers), a **heatmap**-tinted
+    % column, and **sortable** columns.
+  - **Live updates** over **Server-Sent Events** that flash cells green/red on change —
+    real-time trades from Finnhub's WebSocket when the API key is set, and periodic cache
+    snapshots otherwise.
 - **Stock detail page** per ticker:
   - **Interactive price chart** — hover for a date/price tooltip, zoom the range
     from 1 month out to 5 years. Dependency-free (no charting library, works offline).

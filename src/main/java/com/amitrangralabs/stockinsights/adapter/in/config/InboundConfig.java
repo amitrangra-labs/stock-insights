@@ -4,15 +4,20 @@ import com.amitrangralabs.stockinsights.adapter.in.endpoint.DashboardEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HealthEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HomeEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceHistoryApiEndpoint;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.LiveSnapshotScheduler;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceStreamEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.RefreshScheduler;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.StockDetailEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.SymbolSearchEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.WatchlistEndpoint;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
+import com.amitrangralabs.stockinsights.domain.service.PriceStreamService;
 import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
 import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
+import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
@@ -97,5 +102,19 @@ public class InboundConfig {
     @Bean
     public SymbolSearchEndpoint symbolSearchEndpoint(SymbolSearchService symbolSearchService) {
         return new SymbolSearchEndpoint(symbolSearchService);
+    }
+
+    @Bean
+    public PriceStreamEndpoint priceStreamEndpoint(PriceStreamService priceStreamService) {
+        return new PriceStreamEndpoint(priceStreamService);
+    }
+
+    @Bean
+    public LiveSnapshotScheduler liveSnapshotScheduler(
+            MarketDataRepositoryPort marketDataRepositoryPort,
+            WatchlistPort watchlistPort,
+            PriceStreamService priceStreamService) {
+        return new LiveSnapshotScheduler(
+                marketDataRepositoryPort, watchlistPort, priceStreamService);
     }
 }

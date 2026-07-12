@@ -2,6 +2,7 @@ package com.amitrangralabs.stockinsights.domain.config;
 
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
+import com.amitrangralabs.stockinsights.domain.service.PriceStreamService;
 import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
 import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
@@ -75,6 +76,12 @@ public class DomainConfig {
     @Bean
     public SymbolSearchService symbolSearchService(SymbolSearchPort symbolSearchPort) {
         return new SymbolSearchService(symbolSearchPort);
+    }
+
+    /** Fan-out hub between the price feed (WebSocket/snapshots) and SSE clients. */
+    @Bean
+    public PriceStreamService priceStreamService() {
+        return new PriceStreamService();
     }
 
     /**

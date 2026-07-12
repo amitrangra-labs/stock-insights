@@ -47,10 +47,16 @@ stock-insights:
   refresh-initial-delay-ms: 10000
   reference-refresh-interval-ms: 86400000     # reference: every 24 h
   reference-refresh-initial-delay-ms: 20000
+  # How often to rebroadcast the latest cached quotes to live (SSE) clients, so the
+  # dashboard auto-updates even without the real-time WebSocket.
+  snapshot-broadcast-interval-ms: 12000
+  snapshot-broadcast-initial-delay-ms: 15000
   market-data:
     # Quotes, profiles, fundamentals, ratings, news (needs a free API key).
     finnhub:
       base-url: https://finnhub.io/api/v1
+      # Real-time trade stream (needs the same API key; free tier includes it).
+      ws-url: wss://ws.finnhub.io
       api-key: ${FINNHUB_API_KEY:}
       # Minimum gap between Finnhub calls. The free tier allows 60/min; ~1.1s spacing
       # caps us at ~54/min so bursts (refresh + on-add) never trip the limit. Set 0 to disable.

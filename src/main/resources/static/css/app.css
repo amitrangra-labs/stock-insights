@@ -218,6 +218,25 @@ table.quotes td.name {
     stroke: #dc2626;
 }
 
+/* Live-update cell flash (Bloomberg-style blink) */
+@keyframes flash-up-anim {
+    from { background-color: rgba(22, 163, 74, 0.55); }
+    to   { background-color: transparent; }
+}
+
+@keyframes flash-down-anim {
+    from { background-color: rgba(220, 38, 38, 0.55); }
+    to   { background-color: transparent; }
+}
+
+table.quotes td.flash-up {
+    animation: flash-up-anim 0.9s ease-out;
+}
+
+table.quotes td.flash-down {
+    animation: flash-down-anim 0.9s ease-out;
+}
+
 table.quotes th,
 table.quotes td {
     padding: 0.6rem 0.75rem;
