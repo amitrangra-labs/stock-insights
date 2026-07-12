@@ -13,6 +13,8 @@ import com.amitrangralabs.stockinsights.domain.service.MarketDataRefreshService;
 import com.amitrangralabs.stockinsights.domain.service.StockDetailService;
 import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,10 +76,22 @@ public class InboundConfig {
         return new PriceHistoryApiEndpoint(stockDetailService);
     }
 
+    /** Single background thread for on-add ticker refreshes (keeps the add redirect instant). */
+    @Bean(destroyMethod = "shutdown")
+    public ExecutorService refreshExecutor() {
+        return Executors.newSingleThreadExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "ticker-refresh");
+            thread.setDaemon(true);
+            return thread;
+        });
+    }
+
     @Bean
     public WatchlistEndpoint watchlistEndpoint(
-            WatchlistService watchlistService, MarketDataRefreshService marketDataRefreshService) {
-        return new WatchlistEndpoint(watchlistService, marketDataRefreshService);
+            WatchlistService watchlistService,
+            MarketDataRefreshService marketDataRefreshService,
+            ExecutorService refreshExecutor) {
+        return new WatchlistEndpoint(watchlistService, marketDataRefreshService, refreshExecutor);
     }
 
     @Bean

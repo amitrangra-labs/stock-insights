@@ -32,10 +32,12 @@ public class FinnhubClient implements MarketDataPort {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final MinIntervalRateLimiter rateLimiter;
 
-    public FinnhubClient(RestClient restClient, String apiKey) {
+    public FinnhubClient(RestClient restClient, String apiKey, long minCallIntervalMillis) {
         this.restClient = restClient;
         this.apiKey = apiKey == null ? "" : apiKey.trim();
+        this.rateLimiter = new MinIntervalRateLimiter(minCallIntervalMillis);
     }
 
     @Override
@@ -86,6 +88,7 @@ public class FinnhubClient implements MarketDataPort {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(NEWS_LOOKBACK_DAYS);
         NewsResponse[] items;
+        rateLimiter.acquire();
         try {
             items = restClient
                     .get()
@@ -134,6 +137,7 @@ public class FinnhubClient implements MarketDataPort {
     public Fundamentals fetchFundamentals(String ticker) {
         requireApiKey();
         MetricResponse resp;
+        rateLimiter.acquire();
         try {
             resp = restClient
                     .get()
@@ -166,6 +170,7 @@ public class FinnhubClient implements MarketDataPort {
     }
 
     private <T> T get(String path, String ticker, Class<T> type) {
+        rateLimiter.acquire();
         try {
             return restClient
                     .get()

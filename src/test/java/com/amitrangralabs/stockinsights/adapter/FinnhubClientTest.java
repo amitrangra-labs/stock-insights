@@ -24,7 +24,7 @@ class FinnhubClientTest {
     private FinnhubClient clientBoundTo(MockRestServiceServer[] serverHolder) {
         RestClient.Builder builder = RestClient.builder().baseUrl("https://finnhub.test");
         serverHolder[0] = MockRestServiceServer.bindTo(builder).build();
-        return new FinnhubClient(builder.build(), "test-key");
+        return new FinnhubClient(builder.build(), "test-key", 0); // no throttle in tests
     }
 
     @Test
@@ -81,7 +81,7 @@ class FinnhubClientTest {
 
     @Test
     void blankApiKeyFailsFastWithoutCallingTheNetwork() {
-        FinnhubClient client = new FinnhubClient(RestClient.builder().build(), "  ");
+        FinnhubClient client = new FinnhubClient(RestClient.builder().build(), "  ", 0);
 
         assertThatThrownBy(() -> client.fetchQuote("AAPL"))
                 .isInstanceOf(MarketDataException.class)

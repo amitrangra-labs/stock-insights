@@ -80,7 +80,8 @@ class MarketDataRefreshServiceTest {
                 marketDataPort(Set.of()), repo, priceHistoryPort(Set.of()), histRepo,
                 new FakeWatchlist("AAPL", "MSFT"));
 
-        service.refreshAll();
+        service.refreshLive();
+        service.refreshReference();
 
         assertThat(repo.quotes.keySet()).containsExactlyInAnyOrder("AAPL", "MSFT");
         assertThat(repo.profiles.keySet()).containsExactlyInAnyOrder("AAPL", "MSFT");
@@ -96,7 +97,8 @@ class MarketDataRefreshServiceTest {
                 marketDataPort(Set.of("BAD")), repo, priceHistoryPort(Set.of("BAD")), histRepo,
                 new FakeWatchlist("AAPL", "BAD", "MSFT"));
 
-        service.refreshAll();
+        service.refreshLive();
+        service.refreshReference();
 
         assertThat(repo.quotes.keySet()).isEqualTo(Set.of("AAPL", "MSFT"));
         assertThat(histRepo.history.keySet()).isEqualTo(Set.of("AAPL", "MSFT"));
@@ -111,7 +113,8 @@ class MarketDataRefreshServiceTest {
                 marketDataPort(Set.of()), repo, priceHistoryPort(Set.of("AAPL")), histRepo,
                 new FakeWatchlist("AAPL"));
 
-        service.refreshAll();
+        service.refreshLive();
+        service.refreshReference();
 
         assertThat(repo.quotes).containsKey("AAPL");
         assertThat(repo.profiles).containsKey("AAPL");

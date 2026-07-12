@@ -23,8 +23,14 @@ architecture with **explicit Spring wiring** (no `@Autowired`, no stereotype sca
   - **Fundamentals** (P/E, EPS, 52-week high/low, dividend yield, beta).
   - **Analyst ratings** distribution (strong buy → strong sell).
   - **Recent company news**.
-- **Background refresh** into a local cache, so pages never call the APIs directly
-  and stay within free-tier limits. Missing data degrades gracefully to placeholders.
+- **Background refresh** into a local cache, so pages never call the APIs directly.
+  Two cadences keep usage under Finnhub's free tier (60 calls/min): a **live** tier
+  (quote + news) every 5 min and a **reference** tier (profile, fundamentals, ratings,
+  history) daily. Calls are also **throttled** (~1.1s apart) so bursts never trip the
+  limit, and adding a ticker refreshes it on a background thread. Missing data degrades
+  gracefully to placeholders. See the `stock-insights.*` refresh settings in
+  [`application.yml`](src/main/resources/application.yml). Rule of thumb: **~10 tickers**
+  is comfortable with a Finnhub key; history (Yahoo, keyless) has no such limit.
 
 ## Quick start
 

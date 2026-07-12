@@ -41,7 +41,9 @@ public class OutboundConfig {
     @Bean
     public MarketDataPort marketDataPort(RestClient finnhubRestClient, Environment env) {
         String apiKey = env.getProperty("stock-insights.market-data.finnhub.api-key", "");
-        return new FinnhubClient(finnhubRestClient, apiKey);
+        long minCallIntervalMs = env.getProperty(
+                "stock-insights.market-data.finnhub.min-call-interval-ms", Long.class, 1100L);
+        return new FinnhubClient(finnhubRestClient, apiKey, minCallIntervalMs);
     }
 
     /** The local quote/profile cache, backed by H2 through {@link JdbcClient}. */

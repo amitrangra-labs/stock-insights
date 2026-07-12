@@ -48,45 +48,75 @@ public class MarketDataRefreshService {
         this.watchlist = watchlist;
     }
 
-    /** Refresh quote, profile, and price history for every tracked ticker. Never throws. */
-    public void refreshAll() {
+    /**
+     * Refresh frequently-changing data (quote + news) for every tracked ticker. Never throws.
+     * Runs on the short "live" cadence.
+     */
+    public void refreshLive() {
         List<String> tickers = watchlist.list();
         if (tickers.isEmpty()) {
-            log.info("Watchlist is empty; nothing to refresh.");
+            log.info("Watchlist is empty; nothing to refresh (live).");
             return;
         }
-        log.info("Refreshing market data for {} ticker(s): {}", tickers.size(), tickers);
+        log.info("Refreshing live data (quote, news) for {} ticker(s): {}", tickers.size(), tickers);
         int quotes = 0;
-        int profiles = 0;
-        int histories = 0;
+        int news = 0;
         for (String ticker : tickers) {
             if (refreshQuote(ticker)) {
                 quotes++;
             }
+            if (refreshNews(ticker)) {
+                news++;
+            }
+        }
+        int n = tickers.size();
+        log.info("Live refresh complete: {}/{} quotes, {}/{} news.", quotes, n, news, n);
+    }
+
+    /**
+     * Refresh slowly-changing data (profile, fundamentals, analyst ratings, price history) for
+     * every tracked ticker. Never throws. Runs on the long "reference" cadence to save API calls.
+     */
+    public void refreshReference() {
+        List<String> tickers = watchlist.list();
+        if (tickers.isEmpty()) {
+            log.info("Watchlist is empty; nothing to refresh (reference).");
+            return;
+        }
+        log.info("Refreshing reference data (profile, fundamentals, ratings, history) for {} ticker(s): {}",
+                tickers.size(), tickers);
+        int profiles = 0;
+        int fundamentals = 0;
+        int ratings = 0;
+        int histories = 0;
+        for (String ticker : tickers) {
             if (refreshProfile(ticker)) {
                 profiles++;
+            }
+            if (refreshFundamentals(ticker)) {
+                fundamentals++;
+            }
+            if (refreshRatings(ticker)) {
+                ratings++;
             }
             if (refreshHistory(ticker)) {
                 histories++;
             }
-            refreshNews(ticker);
-            refreshRatings(ticker);
-            refreshFundamentals(ticker);
         }
         int n = tickers.size();
-        log.info("Refresh complete: {}/{} quotes, {}/{} profiles, {}/{} histories updated "
-                + "(plus news/ratings/fundamentals where available).", quotes, n, profiles, n, histories, n);
+        log.info("Reference refresh complete: {}/{} profiles, {}/{} fundamentals, {}/{} ratings, {}/{} histories.",
+                profiles, n, fundamentals, n, ratings, n, histories, n);
     }
 
-    /** Refresh a single ticker (used right after it is added to the watchlist). Never throws. */
+    /** Refresh everything for a single ticker (used right after it is added). Never throws. */
     public void refreshTicker(String ticker) {
-        log.info("Refreshing market data for newly added ticker {}", ticker);
+        log.info("Refreshing all data for newly added ticker {}", ticker);
         refreshQuote(ticker);
-        refreshProfile(ticker);
-        refreshHistory(ticker);
         refreshNews(ticker);
-        refreshRatings(ticker);
+        refreshProfile(ticker);
         refreshFundamentals(ticker);
+        refreshRatings(ticker);
+        refreshHistory(ticker);
     }
 
     private boolean refreshQuote(String ticker) {
@@ -122,30 +152,36 @@ public class MarketDataRefreshService {
         }
     }
 
-    private void refreshNews(String ticker) {
+    private boolean refreshNews(String ticker) {
         try {
             List<NewsItem> news = marketData.fetchNews(ticker);
             repository.saveNews(ticker, news);
+            return true;
         } catch (RuntimeException e) {
             log.warn("Could not refresh news for {}: {}", ticker, e.getMessage());
+            return false;
         }
     }
 
-    private void refreshRatings(String ticker) {
+    private boolean refreshRatings(String ticker) {
         try {
             AnalystRating rating = marketData.fetchRatings(ticker);
             repository.saveRating(ticker, rating);
+            return true;
         } catch (RuntimeException e) {
             log.warn("Could not refresh ratings for {}: {}", ticker, e.getMessage());
+            return false;
         }
     }
 
-    private void refreshFundamentals(String ticker) {
+    private boolean refreshFundamentals(String ticker) {
         try {
             Fundamentals fundamentals = marketData.fetchFundamentals(ticker);
             repository.saveFundamentals(fundamentals);
+            return true;
         } catch (RuntimeException e) {
             log.warn("Could not refresh fundamentals for {}: {}", ticker, e.getMessage());
+            return false;
         }
     }
 }

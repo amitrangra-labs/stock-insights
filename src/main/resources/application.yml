@@ -25,9 +25,9 @@ server:
 # are never committed. See .env.example for the full list.
 stock-insights:
   # Seed watchlist used on first start only (the watchlist is user-editable after that).
-  # Top 10 US large-caps + top 10 ETFs. Symbols chosen to avoid dot/dash mapping issues.
+  # Kept to 10 so a fresh install with a Finnhub key stays within the free-tier rate
+  # limit (see refresh settings below). Add more via the dashboard search box.
   tracked-tickers:
-    # --- Stocks ---
     - NVDA
     - AAPL
     - MSFT
@@ -36,28 +36,25 @@ stock-insights:
     - META
     - AVGO
     - TSLA
-    - JPM
-    - WMT
-    # --- ETFs ---
-    - SPY
-    - VOO
-    - IVV
-    - VTI
-    - QQQ
-    - VEA
-    - VUG
-    - VTV
-    - BND
-    - GLD
-  # Background refresh cadence (Journey A). Kept conservative to respect free-tier
-  # rate limits. The initial delay lets the app finish starting before the first fetch.
-  refresh-interval-ms: 300000
+    - SPY   # ETF: S&P 500
+    - QQQ   # ETF: Nasdaq 100
+  # Background refresh cadences (Journey A). Two tiers keep us under free-tier limits:
+  #  - "live" (quote + news) runs often, since these change intraday.
+  #  - "reference" (profile, fundamentals, analyst ratings, price history) runs daily,
+  #    since these barely change during the day.
+  # Initial delays let the app finish starting before the first fetch.
+  refresh-interval-ms: 300000                 # live: every 5 min
   refresh-initial-delay-ms: 10000
+  reference-refresh-interval-ms: 86400000     # reference: every 24 h
+  reference-refresh-initial-delay-ms: 20000
   market-data:
-    # Quotes + company profiles (needs a free API key).
+    # Quotes, profiles, fundamentals, ratings, news (needs a free API key).
     finnhub:
       base-url: https://finnhub.io/api/v1
       api-key: ${FINNHUB_API_KEY:}
+      # Minimum gap between Finnhub calls. The free tier allows 60/min; ~1.1s spacing
+      # caps us at ~54/min so bursts (refresh + on-add) never trip the limit. Set 0 to disable.
+      min-call-interval-ms: 1100
     # Daily price history (keyless). We cache the full 5y window so the detail-page
     # chart can zoom from 1 month out to 5 years without any extra fetch.
     yahoo:
