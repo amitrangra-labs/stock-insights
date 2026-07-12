@@ -35,6 +35,7 @@
             </form>
         </div>
 
+        <div class="table-scroll">
         <table class="quotes">
             <thead>
                 <tr>
@@ -42,25 +43,54 @@
                     <th>Name</th>
                     <th class="num">Price</th>
                     <th class="num">Change</th>
-                    <th class="num">Change %</th>
-                    <th>As of</th>
+                    <th class="num">Chg %</th>
+                    <th>Day range</th>
+                    <th class="num">Volume</th>
+                    <th class="num">Mkt cap</th>
+                    <th>52-wk range</th>
+                    <th>Trend (30d)</th>
                     <th><span class="visually-hidden">Actions</span></th>
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="row : ${rows}">
+                <tr th:each="row : ${rows}" th:attr="data-ticker=${row.ticker}">
                     <td class="ticker">
                         <a th:href="@{/stocks/{t}(t=${row.ticker})}" th:text="${row.ticker}">AAPL</a>
                     </td>
-                    <td th:text="${row.name}">Apple Inc</td>
-                    <td class="num" th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.price,1,2)} : '—'">0.00</td>
-                    <td class="num"
+                    <td class="name" th:text="${row.name}" th:title="${row.name}">Apple Inc</td>
+                    <td class="num price" data-field="price" th:title="'As of ' + ${row.asOfDisplay()}"
+                        th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.price,1,2)} : '—'">0.00</td>
+                    <td class="num change" data-field="change"
                         th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.change,1,2)} : '—'">0.00</td>
-                    <td class="num"
+                    <td class="num pct" data-field="pct"
                         th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.percentChange,1,2)} + '%' : '—'">0.00%</td>
-                    <td class="muted" th:text="${row.asOfDisplay()}">—</td>
+                    <td class="range-cell">
+                        <div class="rangebar" th:if="${row.hasDayRange()}"
+                             th:title="${#numbers.formatDecimal(row.dayLow,1,2)} + ' – ' + ${#numbers.formatDecimal(row.dayHigh,1,2)}">
+                            <span class="rangebar-marker" th:styleappend="'left:' + ${row.dayRangePercent()} + '%'"></span>
+                        </div>
+                        <span th:unless="${row.hasDayRange()}" class="muted">—</span>
+                    </td>
+                    <td class="num" th:text="${row.volumeDisplay()}">—</td>
+                    <td class="num" th:text="${row.marketCapDisplay()}">—</td>
+                    <td class="range-cell">
+                        <div class="rangebar wk52" th:if="${row.has52WeekRange()}"
+                             th:title="${#numbers.formatDecimal(row.low52Week,1,2)} + ' – ' + ${#numbers.formatDecimal(row.high52Week,1,2)}">
+                            <span class="rangebar-marker" th:styleappend="'left:' + ${row.week52Percent()} + '%'"></span>
+                        </div>
+                        <span th:unless="${row.has52WeekRange()}" class="muted">—</span>
+                    </td>
+                    <td class="spark-cell">
+                        <svg th:if="${row.hasSpark()}" class="spark"
+                             th:classappend="${row.sparkUp()} ? ' up' : ' down'"
+                             viewBox="0 0 100 28" preserveAspectRatio="none" width="90" height="26"
+                             aria-hidden="true">
+                            <polyline th:attr="points=${row.sparkPoints()}" fill="none"></polyline>
+                        </svg>
+                        <span th:unless="${row.hasSpark()}" class="muted">—</span>
+                    </td>
                     <td class="actions">
                         <form method="post" th:action="@{/watchlist/{t}/remove(t=${row.ticker})}">
                             <button type="submit" class="remove-btn"
@@ -69,10 +99,11 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(rows)}">
-                    <td colspan="7" class="muted">Your watchlist is empty. Add a ticker above.</td>
+                    <td colspan="11" class="muted">Your watchlist is empty. Add a ticker above.</td>
                 </tr>
             </tbody>
         </table>
+        </div>
     </main>
 
     <script th:src="@{/js/ticker-search.js}"></script>

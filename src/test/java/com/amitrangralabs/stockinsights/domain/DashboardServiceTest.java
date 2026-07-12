@@ -4,48 +4,70 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
 import com.amitrangralabs.stockinsights.domain.object.DashboardRow;
+import com.amitrangralabs.stockinsights.domain.object.Fundamentals;
+import com.amitrangralabs.stockinsights.domain.object.PricePoint;
 import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-/** Pure unit tests for Journey B — reads cached data through a fake repository. */
+/** Pure unit tests for Journey B — reads cached data through fake repositories. */
 class DashboardServiceTest {
 
+    private DashboardService service(FakeMarketDataRepository repo, FakePriceHistoryRepository hist,
+            FakeWatchlist watchlist) {
+        return new DashboardService(repo, hist, watchlist);
+    }
+
     @Test
-    void buildsOneRowPerTrackedTickerInOrder() {
+    void buildsRichRowsPerTrackedTickerInOrder() {
         var repo = new FakeMarketDataRepository();
         repo.saveQuote(new Quote("MSFT", 420.5, 2.5, 0.6, 421, 418, 419,
                 418, Instant.parse("2026-01-02T15:00:00Z")));
         repo.saveProfile(new CompanyProfile("MSFT", "Microsoft Corp", "NASDAQ", "USD",
                 "Tech", 3_000_000, "", ""));
+        repo.saveFundamentals(new Fundamentals("MSFT", 30.0, 12.0, 450.0, 300.0, 0.8, 0.9));
+        var hist = new FakePriceHistoryRepository();
+        hist.saveHistory("MSFT", List.of(
+                new PricePoint(LocalDate.of(2026, 1, 1), 410, 415, 409, 412, 20_000_000),
+                new PricePoint(LocalDate.of(2026, 1, 2), 412, 421, 411, 419, 25_500_000)));
 
-        var service = new DashboardService(repo, new FakeWatchlist("AAPL", "MSFT"));
+        var service = service(repo, hist, new FakeWatchlist("AAPL", "MSFT"));
         List<DashboardRow> rows = service.getDashboard();
 
         assertThat(rows).extracting(DashboardRow::ticker).containsExactly("AAPL", "MSFT");
 
         DashboardRow msft = rows.get(1);
         assertThat(msft.name()).isEqualTo("Microsoft Corp");
-        assertThat(msft.currency()).isEqualTo("USD");
         assertThat(msft.price()).isEqualTo(420.5);
         assertThat(msft.hasQuote()).isTrue();
         assertThat(msft.isUp()).isTrue();
-        assertThat(msft.asOfDisplay()).isEqualTo("2026-01-02 15:00 UTC");
+        assertThat(msft.hasDayRange()).isTrue();
+        assertThat(msft.has52WeekRange()).isTrue();
+        assertThat(msft.volume()).isEqualTo(25_500_000L); // latest history volume
+        assertThat(msft.volumeDisplay()).isEqualTo("25.50M");
+        assertThat(msft.marketCapDisplay()).isEqualTo("3.00T"); // 3,000,000 millions
+        assertThat(msft.hasSpark()).isTrue();
+        assertThat(msft.sparkPoints()).isNotBlank();
+        assertThat(msft.sparkUp()).isTrue(); // 412 -> 419
     }
 
     @Test
     void tickerWithNoCachedDataStillGetsAPlaceholderRow() {
-        var repo = new FakeMarketDataRepository();
-        var service = new DashboardService(repo, new FakeWatchlist("AAPL"));
+        var service = service(new FakeMarketDataRepository(), new FakePriceHistoryRepository(),
+                new FakeWatchlist("AAPL"));
 
         DashboardRow row = service.getDashboard().get(0);
 
         assertThat(row.ticker()).isEqualTo("AAPL");
         assertThat(row.name()).isEqualTo("AAPL"); // falls back to the ticker
         assertThat(row.hasQuote()).isFalse();
-        assertThat(row.price()).isNull();
+        assertThat(row.hasDayRange()).isFalse();
+        assertThat(row.hasSpark()).isFalse();
+        assertThat(row.volumeDisplay()).isEqualTo("—");
+        assertThat(row.marketCapDisplay()).isEqualTo("—");
         assertThat(row.asOfDisplay()).isEqualTo("—");
     }
 
@@ -54,7 +76,7 @@ class DashboardServiceTest {
         var repo = new FakeMarketDataRepository();
         repo.saveQuote(new Quote("AAPL", 180, -1.5, -0.8, 182, 179, 181,
                 181.5, Instant.parse("2026-01-02T15:00:00Z")));
-        var service = new DashboardService(repo, new FakeWatchlist("AAPL"));
+        var service = service(repo, new FakePriceHistoryRepository(), new FakeWatchlist("AAPL"));
 
         assertThat(service.getDashboard().get(0).isUp()).isFalse();
     }

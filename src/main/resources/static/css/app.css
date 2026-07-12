@@ -77,11 +77,75 @@ a {
     font-weight: 600;
 }
 
+.table-scroll {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
 table.quotes {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+table.quotes td.name {
+    max-width: 12rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Low–high position bars (day range, 52-week range) */
+.range-cell {
+    min-width: 5.5rem;
+}
+
+.rangebar {
+    position: relative;
+    height: 6px;
+    width: 5rem;
+    border-radius: 3px;
+    background: linear-gradient(to right, #dc2626, #a1a1aa, #16a34a);
+    opacity: 0.55;
+}
+
+.rangebar.wk52 {
+    background: color-mix(in srgb, var(--fg) 18%, transparent);
+}
+
+.rangebar-marker {
+    position: absolute;
+    top: -2px;
+    width: 3px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--fg);
+    transform: translateX(-50%);
+}
+
+/* Inline sparkline */
+.spark-cell {
+    min-width: 6rem;
+}
+
+.spark {
+    display: block;
+    width: 90px;
+    height: 26px;
+}
+
+.spark polyline {
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+}
+
+.spark.up polyline {
+    stroke: #16a34a;
+}
+
+.spark.down polyline {
+    stroke: #dc2626;
 }
 
 table.quotes th,

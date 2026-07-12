@@ -51,8 +51,11 @@ public class DomainConfig {
 
     @Bean
     public DashboardService dashboardService(
-            MarketDataRepositoryPort marketDataRepositoryPort, WatchlistPort watchlistPort) {
-        return new DashboardService(marketDataRepositoryPort, watchlistPort);
+            MarketDataRepositoryPort marketDataRepositoryPort,
+            PriceHistoryRepositoryPort priceHistoryRepositoryPort,
+            WatchlistPort watchlistPort) {
+        return new DashboardService(
+                marketDataRepositoryPort, priceHistoryRepositoryPort, watchlistPort);
     }
 
     @Bean

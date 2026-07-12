@@ -1,29 +1,35 @@
 package com.amitrangralabs.stockinsights.domain.service;
 
-import com.amitrangralabs.stockinsights.domain.object.CompanyProfile;
 import com.amitrangralabs.stockinsights.domain.object.DashboardRow;
-import com.amitrangralabs.stockinsights.domain.object.Quote;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
+import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Journey B: builds the dashboard view model from cached data only.
  *
- * <p>Plain Java, framework-free. Reads through {@link MarketDataRepositoryPort} — it never calls the
- * external provider — so the page is fast and rate-limit-safe. Produces one {@link DashboardRow} per
- * ticker on the {@link WatchlistPort}, in watchlist order, filling placeholders for tickers not yet
- * cached.
+ * <p>Plain Java, framework-free. Reads through the repository ports — never the external providers —
+ * so the page is fast and rate-limit-safe. Produces one {@link DashboardRow} per ticker on the
+ * {@link WatchlistPort}, joining the latest quote, fundamentals, profile, and a short price-history
+ * spark; tickers with nothing cached still get a placeholder row.
  */
 public class DashboardService {
 
+    /** Length of the inline sparkline (trading days). */
+    private static final int SPARK_DAYS = 30;
+
     private final MarketDataRepositoryPort repository;
+    private final PriceHistoryRepositoryPort priceHistoryRepository;
     private final WatchlistPort watchlist;
 
-    public DashboardService(MarketDataRepositoryPort repository, WatchlistPort watchlist) {
+    public DashboardService(
+            MarketDataRepositoryPort repository,
+            PriceHistoryRepositoryPort priceHistoryRepository,
+            WatchlistPort watchlist) {
         this.repository = repository;
+        this.priceHistoryRepository = priceHistoryRepository;
         this.watchlist = watchlist;
     }
 
@@ -31,24 +37,14 @@ public class DashboardService {
         List<String> tickers = watchlist.list();
         List<DashboardRow> rows = new ArrayList<>(tickers.size());
         for (String ticker : tickers) {
-            Optional<Quote> quote = repository.findLatestQuote(ticker);
-            Optional<CompanyProfile> profile = repository.findProfile(ticker);
-            rows.add(toRow(ticker, quote, profile));
+            rows.add(DashboardRow.from(
+                    ticker,
+                    repository.findLatestQuote(ticker),
+                    repository.findProfile(ticker),
+                    repository.findFundamentals(ticker),
+                    priceHistoryRepository.findHistory(ticker),
+                    SPARK_DAYS));
         }
         return rows;
-    }
-
-    private static DashboardRow toRow(
-            String ticker, Optional<Quote> quote, Optional<CompanyProfile> profile) {
-        String name = profile.map(CompanyProfile::name).filter(n -> !n.isBlank()).orElse(ticker);
-        String currency = profile.map(CompanyProfile::currency).orElse(null);
-        return new DashboardRow(
-                ticker,
-                name,
-                currency,
-                quote.map(Quote::current).orElse(null),
-                quote.map(Quote::change).orElse(null),
-                quote.map(Quote::percentChange).orElse(null),
-                quote.map(Quote::asOf).orElse(null));
     }
 }
