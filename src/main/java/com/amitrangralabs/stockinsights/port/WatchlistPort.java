@@ -22,6 +22,9 @@ public interface WatchlistPort {
     /** Remove a ticker; returns {@code true} if it was present. */
     boolean remove(String ticker);
 
+    /** Remove every ticker from the watchlist. */
+    void clear();
+
     /** Whether the ticker is currently tracked. */
     boolean contains(String ticker);
 }

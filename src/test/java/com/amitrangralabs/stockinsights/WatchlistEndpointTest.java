@@ -52,11 +52,16 @@ class WatchlistEndpointTest {
     }
 
     private WatchlistEndpoint endpoint(FakeWatchlist watchlist, FakeMarketDataRepository repo) {
+        return endpoint(watchlist, repo, List.of());
+    }
+
+    private WatchlistEndpoint endpoint(
+            FakeWatchlist watchlist, FakeMarketDataRepository repo, List<String> defaults) {
         PriceHistoryPort history = t ->
                 List.of(new PricePoint(LocalDate.of(2026, 1, 2), 99, 101, 98, 100, 1_000_000));
         var refresh = new MarketDataRefreshService(
                 marketDataPort(), repo, history, new FakePriceHistoryRepository(), watchlist);
-        return new WatchlistEndpoint(new WatchlistService(watchlist), refresh, SYNC);
+        return new WatchlistEndpoint(new WatchlistService(watchlist, defaults), refresh, SYNC);
     }
 
     @Test
@@ -90,5 +95,18 @@ class WatchlistEndpointTest {
 
         assertThat(view).isEqualTo("redirect:/dashboard");
         assertThat(watchlist.list()).containsExactly("MSFT");
+    }
+
+    @Test
+    void resetClearsCustomListAndRestoresDefaults() {
+        var watchlist = new FakeWatchlist("TOST", "PLTR"); // user-added tickers
+        var repo = new FakeMarketDataRepository();
+        var endpoint = endpoint(watchlist, repo, List.of("NVDA", "AAPL"));
+
+        String view = endpoint.reset();
+
+        assertThat(view).isEqualTo("redirect:/dashboard");
+        assertThat(watchlist.list()).containsExactly("NVDA", "AAPL"); // custom removed, defaults in
+        assertThat(repo.quotes.keySet()).contains("NVDA", "AAPL");     // refetched (sync executor)
     }
 }

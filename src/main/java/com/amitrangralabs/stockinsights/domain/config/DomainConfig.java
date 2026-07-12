@@ -65,8 +65,8 @@ public class DomainConfig {
     }
 
     @Bean
-    public WatchlistService watchlistService(WatchlistPort watchlistPort) {
-        return new WatchlistService(watchlistPort);
+    public WatchlistService watchlistService(WatchlistPort watchlistPort, Environment env) {
+        return new WatchlistService(watchlistPort, trackedTickers(env));
     }
 
     @Bean
@@ -79,14 +79,13 @@ public class DomainConfig {
      * (i.e. when the watchlist table is empty). After that the watchlist is user-managed.
      */
     @Bean
-    public ApplicationRunner watchlistSeeder(WatchlistService watchlistService, Environment env) {
+    public ApplicationRunner watchlistSeeder(WatchlistService watchlistService) {
         return args -> {
-            if (!watchlistService.tickers().isEmpty()) {
-                return;
+            boolean wasEmpty = watchlistService.tickers().isEmpty();
+            watchlistService.seedIfEmpty();
+            if (wasEmpty) {
+                log.info("Seeded watchlist from configuration: {}", watchlistService.tickers());
             }
-            List<String> seed = trackedTickers(env);
-            seed.forEach(watchlistService::add);
-            log.info("Seeded watchlist from configuration: {}", watchlistService.tickers());
         };
     }
 

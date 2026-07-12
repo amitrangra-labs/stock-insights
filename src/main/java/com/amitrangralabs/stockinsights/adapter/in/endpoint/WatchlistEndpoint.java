@@ -44,4 +44,15 @@ public class WatchlistEndpoint {
         watchlistService.remove(ticker);
         return "redirect:/dashboard";
     }
+
+    /** Clear the watchlist, restore the default tickers, and refetch their data in the background. */
+    @PostMapping("/watchlist/reset")
+    public String reset() {
+        watchlistService.resetToDefaults();
+        refreshExecutor.execute(() -> {
+            refreshService.refreshLive();
+            refreshService.refreshReference();
+        });
+        return "redirect:/dashboard";
+    }
 }

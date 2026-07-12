@@ -51,6 +51,11 @@ public class H2WatchlistRepository implements WatchlistPort {
     }
 
     @Override
+    public void clear() {
+        jdbc.sql("DELETE FROM watchlist").update();
+    }
+
+    @Override
     public boolean contains(String ticker) {
         return jdbc.sql("SELECT COUNT(*) FROM watchlist WHERE ticker = :ticker")
                 .param("ticker", ticker)

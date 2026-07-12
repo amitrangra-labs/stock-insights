@@ -34,6 +34,11 @@ public class FakeWatchlist implements WatchlistPort {
     }
 
     @Override
+    public void clear() {
+        tickers.clear();
+    }
+
+    @Override
     public boolean contains(String ticker) {
         return tickers.contains(ticker);
     }

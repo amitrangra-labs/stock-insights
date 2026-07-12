@@ -17,12 +17,36 @@ public class WatchlistService {
     private static final Pattern VALID = Pattern.compile("^[A-Z][A-Z0-9.\\-]{0,15}$");
 
     private final WatchlistPort watchlist;
+    private final List<String> defaultTickers;
 
-    public WatchlistService(WatchlistPort watchlist) {
+    public WatchlistService(WatchlistPort watchlist, List<String> defaultTickers) {
         this.watchlist = watchlist;
+        this.defaultTickers = List.copyOf(defaultTickers);
     }
 
     public List<String> tickers() {
+        return watchlist.list();
+    }
+
+    /** The configured default tickers (the seed / reset target). */
+    public List<String> defaults() {
+        return defaultTickers;
+    }
+
+    /** Seed the watchlist from the defaults, but only if it is currently empty (first start). */
+    public void seedIfEmpty() {
+        if (watchlist.list().isEmpty()) {
+            defaultTickers.forEach(this::add);
+        }
+    }
+
+    /**
+     * Clear the watchlist and repopulate it with the configured defaults. Returns the resulting
+     * tickers (so the caller can refetch their data).
+     */
+    public List<String> resetToDefaults() {
+        watchlist.clear();
+        defaultTickers.forEach(this::add);
         return watchlist.list();
     }
 

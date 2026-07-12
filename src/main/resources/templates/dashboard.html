@@ -18,13 +18,21 @@
             live market. A dash (&mdash;) means no data has been cached yet.
         </p>
 
-        <div class="add-ticker-wrap">
-            <form class="add-ticker" method="post" th:action="@{/watchlist}">
-                <input type="text" name="ticker" placeholder="Search or add a ticker (e.g. TSLA)"
-                       aria-label="Ticker symbol" maxlength="16" autocomplete="off" required>
-                <button type="submit">Add</button>
+        <div class="dash-controls">
+            <div class="add-ticker-wrap">
+                <form class="add-ticker" method="post" th:action="@{/watchlist}">
+                    <input type="text" name="ticker" placeholder="Search or add a ticker (e.g. TSLA)"
+                           aria-label="Ticker symbol" maxlength="16" autocomplete="off" required>
+                    <button type="submit">Add</button>
+                </form>
+                <ul id="ticker-suggestions" class="suggestions" role="listbox" hidden></ul>
+            </div>
+            <form class="reset-form" method="post" th:action="@{/watchlist/reset}"
+                  onsubmit="return confirm('Reset the watchlist to the default tickers? This removes any tickers you added.');">
+                <button type="submit" class="reset-btn" title="Clear the watchlist and restore the default tickers">
+                    Reset to defaults
+                </button>
             </form>
-            <ul id="ticker-suggestions" class="suggestions" role="listbox" hidden></ul>
         </div>
 
         <table class="quotes">

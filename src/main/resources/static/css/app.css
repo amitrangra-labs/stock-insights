@@ -117,10 +117,38 @@ table.quotes td.down {
     white-space: nowrap;
 }
 
+.dash-controls {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
 .add-ticker-wrap {
     position: relative;
-    margin: 1rem 0;
     max-width: 22rem;
+    flex: 1;
+}
+
+.reset-form {
+    margin: 0;
+}
+
+.reset-btn {
+    font: inherit;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 25%, transparent);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+}
+
+.reset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .add-ticker {
