@@ -1,6 +1,8 @@
 package com.amitrangralabs.stockinsights.domain.service;
 
 import com.amitrangralabs.stockinsights.domain.object.DashboardRow;
+import com.amitrangralabs.stockinsights.domain.object.DashboardView;
+import com.amitrangralabs.stockinsights.domain.object.MarketSummary;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
@@ -33,7 +35,7 @@ public class DashboardService {
         this.watchlist = watchlist;
     }
 
-    public List<DashboardRow> getDashboard() {
+    public DashboardView getDashboard() {
         List<String> tickers = watchlist.list();
         List<DashboardRow> rows = new ArrayList<>(tickers.size());
         for (String ticker : tickers) {
@@ -45,6 +47,6 @@ public class DashboardService {
                     priceHistoryRepository.findHistory(ticker),
                     SPARK_DAYS));
         }
-        return rows;
+        return new DashboardView(rows, MarketSummary.from(rows));
     }
 }

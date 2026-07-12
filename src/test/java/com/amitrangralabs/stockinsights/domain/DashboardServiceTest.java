@@ -35,7 +35,7 @@ class DashboardServiceTest {
                 new PricePoint(LocalDate.of(2026, 1, 2), 412, 421, 411, 419, 25_500_000)));
 
         var service = service(repo, hist, new FakeWatchlist("AAPL", "MSFT"));
-        List<DashboardRow> rows = service.getDashboard();
+        List<DashboardRow> rows = service.getDashboard().rows();
 
         assertThat(rows).extracting(DashboardRow::ticker).containsExactly("AAPL", "MSFT");
 
@@ -59,7 +59,7 @@ class DashboardServiceTest {
         var service = service(new FakeMarketDataRepository(), new FakePriceHistoryRepository(),
                 new FakeWatchlist("AAPL"));
 
-        DashboardRow row = service.getDashboard().get(0);
+        DashboardRow row = service.getDashboard().rows().get(0);
 
         assertThat(row.ticker()).isEqualTo("AAPL");
         assertThat(row.name()).isEqualTo("AAPL"); // falls back to the ticker
@@ -78,6 +78,26 @@ class DashboardServiceTest {
                 181.5, Instant.parse("2026-01-02T15:00:00Z")));
         var service = service(repo, new FakePriceHistoryRepository(), new FakeWatchlist("AAPL"));
 
-        assertThat(service.getDashboard().get(0).isUp()).isFalse();
+        assertThat(service.getDashboard().rows().get(0).isUp()).isFalse();
+    }
+
+    @Test
+    void summaryCountsBreadthAndTopMovers() {
+        var repo = new FakeMarketDataRepository();
+        repo.saveQuote(new Quote("AAPL", 100, 5, 5.0, 101, 95, 96, 95,
+                Instant.parse("2026-01-02T15:00:00Z")));   // +5%
+        repo.saveQuote(new Quote("MSFT", 100, -2, -2.0, 103, 99, 102, 102,
+                Instant.parse("2026-01-02T15:00:00Z")));   // -2%
+        repo.saveQuote(new Quote("NVDA", 100, -8, -8.0, 110, 99, 108, 108,
+                Instant.parse("2026-01-02T15:00:00Z")));   // -8%
+        var service = service(repo, new FakePriceHistoryRepository(),
+                new FakeWatchlist("AAPL", "MSFT", "NVDA"));
+
+        var summary = service.getDashboard().summary();
+
+        assertThat(summary.up()).isEqualTo(1);
+        assertThat(summary.down()).isEqualTo(2);
+        assertThat(summary.topGainer()).isEqualTo("AAPL");
+        assertThat(summary.topLoser()).isEqualTo("NVDA");
     }
 }

@@ -77,9 +77,79 @@ a {
     font-weight: 600;
 }
 
+/* Market breadth strip */
+.market-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--fg) 3%, transparent);
+}
+
+.market-strip .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.market-strip .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+}
+
+.market-strip .stat-val {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.market-strip .stat-val a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.market-strip .stat-val.up {
+    color: #16a34a;
+}
+
+.market-strip .stat-val.down {
+    color: #dc2626;
+}
+
 .table-scroll {
     overflow-x: auto;
     margin-top: 1rem;
+}
+
+/* Sortable headers */
+table.quotes th.sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+table.quotes th.sortable:hover {
+    color: var(--accent);
+}
+
+table.quotes th.sortable::after {
+    content: " \2195";
+    opacity: 0.35;
+    font-size: 0.8em;
+}
+
+table.quotes th.sorted-asc::after {
+    content: " \2191";
+    opacity: 0.9;
+}
+
+table.quotes th.sorted-desc::after {
+    content: " \2193";
+    opacity: 0.9;
 }
 
 table.quotes {

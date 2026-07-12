@@ -1,5 +1,6 @@
 package com.amitrangralabs.stockinsights.adapter.in.endpoint;
 
+import com.amitrangralabs.stockinsights.domain.object.DashboardView;
 import com.amitrangralabs.stockinsights.domain.service.DashboardService;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +23,9 @@ public class DashboardEndpoint {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
-        model.addAttribute("rows", dashboardService.getDashboard());
+        DashboardView view = dashboardService.getDashboard();
+        model.addAttribute("rows", view.rows());
+        model.addAttribute("summary", view.summary());
         return "dashboard";
     }
 }

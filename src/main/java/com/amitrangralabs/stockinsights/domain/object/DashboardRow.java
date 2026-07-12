@@ -157,6 +157,19 @@ public record DashboardRow(
         return hasSpark() && spark.get(spark.size() - 1) >= spark.get(0);
     }
 
+    /**
+     * A heatmap background for the % change cell: green (up) or red (down) with opacity scaled by
+     * magnitude (saturating around ±3%). Empty when there is no quote.
+     */
+    public String heatStyle() {
+        if (percentChange == null) {
+            return "";
+        }
+        double alpha = Math.min(Math.abs(percentChange) / 3.0, 1.0) * 0.32;
+        String rgb = percentChange >= 0 ? "22,163,74" : "220,38,38";
+        return "background-color: rgba(" + rgb + "," + String.format("%.2f", alpha) + ")";
+    }
+
     private static double clampPercent(double v) {
         return Math.max(0.0, Math.min(100.0, v));
     }

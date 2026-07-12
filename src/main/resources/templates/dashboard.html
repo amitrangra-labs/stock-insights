@@ -35,18 +35,38 @@
             </form>
         </div>
 
+        <div class="market-strip" th:if="${summary.hasData()}">
+            <div class="stat"><span class="stat-label">Advancing</span><span class="stat-val up" th:text="${summary.up}">0</span></div>
+            <div class="stat"><span class="stat-label">Declining</span><span class="stat-val down" th:text="${summary.down}">0</span></div>
+            <div class="stat"><span class="stat-label">Unchanged</span><span class="stat-val" th:text="${summary.unchanged}">0</span></div>
+            <div class="stat" th:if="${summary.topGainer != null}">
+                <span class="stat-label">Top gainer</span>
+                <span class="stat-val up">
+                    <a th:href="@{/stocks/{t}(t=${summary.topGainer})}" th:text="${summary.topGainer}">TCK</a>
+                    <span th:text="'+' + ${#numbers.formatDecimal(summary.topGainerPct,1,2)} + '%'">+0%</span>
+                </span>
+            </div>
+            <div class="stat" th:if="${summary.topLoser != null}">
+                <span class="stat-label">Top loser</span>
+                <span class="stat-val down">
+                    <a th:href="@{/stocks/{t}(t=${summary.topLoser})}" th:text="${summary.topLoser}">TCK</a>
+                    <span th:text="${#numbers.formatDecimal(summary.topLoserPct,1,2)} + '%'">0%</span>
+                </span>
+            </div>
+        </div>
+
         <div class="table-scroll">
-        <table class="quotes">
+        <table class="quotes" id="quotes-table">
             <thead>
                 <tr>
-                    <th>Ticker</th>
-                    <th>Name</th>
-                    <th class="num">Price</th>
-                    <th class="num">Change</th>
-                    <th class="num">Chg %</th>
+                    <th class="sortable" data-sort="text">Ticker</th>
+                    <th class="sortable" data-sort="text">Name</th>
+                    <th class="num sortable" data-sort="num">Price</th>
+                    <th class="num sortable" data-sort="num">Change</th>
+                    <th class="num sortable" data-sort="num">Chg %</th>
                     <th>Day range</th>
-                    <th class="num">Volume</th>
-                    <th class="num">Mkt cap</th>
+                    <th class="num sortable" data-sort="num">Volume</th>
+                    <th class="num sortable" data-sort="num">Mkt cap</th>
                     <th>52-wk range</th>
                     <th>Trend (30d)</th>
                     <th><span class="visually-hidden">Actions</span></th>
@@ -54,16 +74,18 @@
             </thead>
             <tbody>
                 <tr th:each="row : ${rows}" th:attr="data-ticker=${row.ticker}">
-                    <td class="ticker">
+                    <td class="ticker" th:attr="data-value=${row.ticker}">
                         <a th:href="@{/stocks/{t}(t=${row.ticker})}" th:text="${row.ticker}">AAPL</a>
                     </td>
-                    <td class="name" th:text="${row.name}" th:title="${row.name}">Apple Inc</td>
-                    <td class="num price" data-field="price" th:title="'As of ' + ${row.asOfDisplay()}"
+                    <td class="name" th:text="${row.name}" th:title="${row.name}" th:attr="data-value=${row.name}">Apple Inc</td>
+                    <td class="num price" data-field="price" th:attr="data-value=${row.price}"
+                        th:title="'As of ' + ${row.asOfDisplay()}"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.price,1,2)} : '—'">0.00</td>
-                    <td class="num change" data-field="change"
+                    <td class="num change" data-field="change" th:attr="data-value=${row.change}"
                         th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.change,1,2)} : '—'">0.00</td>
-                    <td class="num pct" data-field="pct"
+                    <td class="num pct" data-field="pct" th:attr="data-value=${row.percentChange}"
+                        th:style="${row.heatStyle()}"
                         th:classappend="${row.hasQuote()} ? (${row.isUp()} ? ' up' : ' down') : ''"
                         th:text="${row.hasQuote()} ? ${#numbers.formatDecimal(row.percentChange,1,2)} + '%' : '—'">0.00%</td>
                     <td class="range-cell">
@@ -73,8 +95,8 @@
                         </div>
                         <span th:unless="${row.hasDayRange()}" class="muted">—</span>
                     </td>
-                    <td class="num" th:text="${row.volumeDisplay()}">—</td>
-                    <td class="num" th:text="${row.marketCapDisplay()}">—</td>
+                    <td class="num" th:attr="data-value=${row.volume}" th:text="${row.volumeDisplay()}">—</td>
+                    <td class="num" th:attr="data-value=${row.marketCapMillions}" th:text="${row.marketCapDisplay()}">—</td>
                     <td class="range-cell">
                         <div class="rangebar wk52" th:if="${row.has52WeekRange()}"
                              th:title="${#numbers.formatDecimal(row.low52Week,1,2)} + ' – ' + ${#numbers.formatDecimal(row.high52Week,1,2)}">
@@ -107,5 +129,6 @@
     </main>
 
     <script th:src="@{/js/ticker-search.js}"></script>
+    <script th:src="@{/js/dashboard-sort.js}"></script>
 </body>
 </html>

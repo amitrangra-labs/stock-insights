@@ -59,6 +59,9 @@ class DashboardPageRenderTest {
                         Matchers.containsString("<polyline"),        // sparkline rendered
                         Matchers.containsString("rangebar-marker"),  // range position bar
                         Matchers.containsString("12.34M"),           // volume display
-                        Matchers.containsString("250.00B"))));       // market cap (250,000 M)
+                        Matchers.containsString("250.00B"),          // market cap (250,000 M)
+                        Matchers.containsString("market-strip"),     // breadth strip
+                        Matchers.containsString("Advancing"),
+                        Matchers.containsString("background-color: rgba(22,163,74")))); // heatmap (up)
     }
 }
