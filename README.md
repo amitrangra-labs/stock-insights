@@ -111,7 +111,23 @@ docker compose up --build
 ```
 
 Tune the JVM via `JAVA_OPTS`, e.g. `-e JAVA_OPTS="-Xmx256m"`. Override any setting
-with a Spring env var, e.g. `-e STOCK_INSIGHTS_REFRESH_INTERVAL_MS=60000`.
+with a Spring env var, e.g. `-e STOCK_INSIGHTS_REFRESH_INTERVAL_MS=60000`. The image
+sets a container-appropriate H2 URL (no `AUTO_SERVER`) and a `/health` healthcheck, so
+`docker compose ps` shows the app's health.
+
+### Troubleshooting
+
+- **"Cannot remove Docker Compose application … Max retries reached: connect ECONNREFUSED"** —
+  this is Docker Desktop losing its backend connection, usually because a container is
+  stuck/crash-looping. Recover with:
+
+  ```bash
+  docker compose kill && docker compose rm -f     # force-remove the stack
+  docker compose down -v                           # also drop the data volume (clears any stale H2 lock)
+  ```
+
+  If it persists, **restart Docker Desktop**, then `docker compose up --build`. Dropping the
+  volume (`-v`) is safe — it only holds the local cache, which is re-fetched on next start.
 
 ## Data sources (free tiers)
 

@@ -9,10 +9,18 @@ services:
     environment:
       FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
       ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY:-}
+      # The container's H2 URL (no AUTO_SERVER) is baked into the image; override here if needed.
     volumes:
       # Persist the H2 cache across container restarts.
       - stock-insights-data:/app/data
-    restart: unless-stopped
+    # Don't auto-restart: if the app crashes it stays down (logs readable, cleanly
+    # removable) instead of crash-LOOPING, which can leave Docker Desktop unable to
+    # manage/remove the stack ("Max retries … ECONNREFUSED"). For a long-running
+    # deployment you can switch this to "unless-stopped".
+    restart: "no"
+    # Give the JVM time to flush H2 and shut down cleanly (avoids stale DB locks).
+    stop_grace_period: 30s
+    # The image defines a HEALTHCHECK (GET /health), so `docker compose ps` shows health.
 
 volumes:
   stock-insights-data:
