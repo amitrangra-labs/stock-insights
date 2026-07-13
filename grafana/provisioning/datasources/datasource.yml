@@ -1,0 +1,12 @@
+# Provisions the Prometheus datasource on Grafana startup (datasource-as-code, no click-ops).
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    # 'prometheus' is the docker-compose service name, resolved on the compose network.
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

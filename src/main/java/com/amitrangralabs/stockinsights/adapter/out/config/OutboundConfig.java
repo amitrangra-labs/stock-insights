@@ -7,6 +7,7 @@ import com.amitrangralabs.stockinsights.adapter.out.client.H2PriceHistoryReposit
 import com.amitrangralabs.stockinsights.adapter.out.client.H2RepositoryClient;
 import com.amitrangralabs.stockinsights.adapter.out.client.H2WatchlistRepository;
 import com.amitrangralabs.stockinsights.adapter.out.client.YahooFinanceClient;
+import com.amitrangralabs.stockinsights.adapter.out.metrics.CacheFreshnessMetrics;
 import com.amitrangralabs.stockinsights.domain.service.PriceStreamService;
 import com.amitrangralabs.stockinsights.port.MarketDataPort;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
@@ -15,6 +16,7 @@ import com.amitrangralabs.stockinsights.port.PriceHistoryRepositoryPort;
 import com.amitrangralabs.stockinsights.port.SymbolSearchPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -110,5 +112,21 @@ public class OutboundConfig {
     @Bean
     public ApplicationRunner tradeStreamStarter(FinnhubTradeStream finnhubTradeStream) {
         return args -> finnhubTradeStream.start();
+    }
+
+    /**
+     * Cache-freshness gauges for Prometheus. A quote counts as "fresh" if it is younger than twice
+     * the live-refresh interval, so a single missed refresh cycle does not breach the freshness SLI.
+     * Registered as a {@link CacheFreshnessMetrics} bean; Spring Boot's Micrometer auto-config binds
+     * every {@code MeterBinder} bean to the registry.
+     */
+    @Bean
+    public CacheFreshnessMetrics cacheFreshnessMetrics(
+            JdbcClient jdbcClient, WatchlistPort watchlistPort, Environment env) {
+        long liveIntervalMs =
+                env.getProperty("stock-insights.refresh-interval-ms", Long.class, 300000L);
+        long freshnessThresholdSeconds = (liveIntervalMs / 1000L) * 2L;
+        return new CacheFreshnessMetrics(
+                jdbcClient, watchlistPort, Clock.systemUTC(), freshnessThresholdSeconds);
     }
 }

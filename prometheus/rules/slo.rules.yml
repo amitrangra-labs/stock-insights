@@ -1,0 +1,64 @@
+# SLO recording + alerting rules — the SINGLE source of truth for SLO maths.
+# Every dashboard panel and every alert reads the si:* series defined here, so a target
+# (e.g. 0.995) is changed in exactly one place. See docs/SLO.md and docs/SLO-DASHBOARD.md.
+#
+# User-facing route filter, reused throughout:
+#   uri=~"/dashboard|/stocks/.*|/api/stocks/.*/history"
+groups:
+  - name: stock-insights-slo
+    interval: 30s
+    rules:
+      # ---- Serving availability (target 99.5% over 30d) ----
+      - record: si:serving_availability:ratio_30d
+        expr: |
+          1 - (
+            sum(increase(http_server_requests_seconds_count{status=~"5..",uri=~"/dashboard|/stocks/.*|/api/stocks/.*/history"}[30d]))
+            /
+            clamp_min(sum(increase(http_server_requests_seconds_count{uri=~"/dashboard|/stocks/.*|/api/stocks/.*/history"}[30d])), 1)
+          )
+
+      # Error-budget remaining as a fraction of the 0.5% budget (1.0 = full, 0 = exhausted).
+      - record: si:serving_availability:budget_remaining_30d
+        expr: |
+          1 - ((1 - si:serving_availability:ratio_30d) / (1 - 0.995))
+
+      # Fast burn-rate signal (1h window), normalised to the budget. >14.4 => pageable.
+      - record: si:serving_availability:burnrate_1h
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5..",uri=~"/dashboard|/stocks/.*|/api/stocks/.*/history"}[1h]))
+            /
+            clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/dashboard|/stocks/.*|/api/stocks/.*/history"}[1h])), 0.001)
+          ) / (1 - 0.995)
+
+      # ---- Serving latency (target: 95% of page loads < 300ms over 30d) ----
+      - record: si:page_latency:under_300ms_ratio_30d
+        expr: |
+          sum(rate(http_server_requests_seconds_bucket{le="0.3",uri=~"/dashboard|/stocks/.*"}[30d]))
+          /
+          clamp_min(sum(rate(http_server_requests_seconds_count{uri=~"/dashboard|/stocks/.*"}[30d])), 1)
+
+      # ---- Quote freshness (target: 99% of tracked tickers fresh) ----
+      # cache_quote_fresh_ratio is the custom gauge exported by CacheFreshnessMetrics.
+      - record: si:quote_freshness:fresh_ratio
+        expr: cache_quote_fresh_ratio
+
+  - name: stock-insights-slo-alerts
+    rules:
+      # Multi-window multi-burn-rate page: fast burn confirmed by a short window.
+      - alert: ServingAvailabilityFastBurn
+        expr: si:serving_availability:burnrate_1h > 14.4
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "Serving availability burning error budget fast (>14.4x over 1h)"
+
+      - alert: QuoteFreshnessSLOBreached
+        expr: si:quote_freshness:fresh_ratio < 0.99
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Cached quotes stale for >1% of tracked tickers (freshness SLO breached)"
+          description: "Usually an upstream (Finnhub) outage or the refresh loop stalling; check refresh_cycle_duration_seconds and upstream call outcomes."

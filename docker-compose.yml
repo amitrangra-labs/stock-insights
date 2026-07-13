@@ -22,5 +22,44 @@ services:
     stop_grace_period: 30s
     # The image defines a HEALTHCHECK (GET /health), so `docker compose ps` shows health.
 
+  # Time-series database + scraper. Pulls /actuator/prometheus from the app every 15s,
+  # stores the samples, and evaluates the SLO recording/alerting rules.
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=90d
+    restart: unless-stopped
+    depends_on:
+      - app
+
+  # Dashboards. Datasource + the SLO dashboard are provisioned from disk (dashboards-as-code).
+  # Anonymous read-only + embedding are enabled so the app's /observability page can iframe it;
+  # this is a local-demo posture — put Grafana behind SSO/a reverse proxy for any real deployment.
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_USERS_DEFAULT_THEME: "light"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
 volumes:
   stock-insights-data:
+  prometheus-data:
+  grafana-data:

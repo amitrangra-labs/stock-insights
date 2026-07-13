@@ -1,0 +1,14 @@
+# Tells Grafana to load dashboard JSON models from disk on startup (dashboards-as-code).
+apiVersion: 1
+
+providers:
+  - name: stock-insights
+    orgId: 1
+    folder: Stock Insights
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

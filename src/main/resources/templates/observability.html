@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="|Observability &middot; ${appName}|">Observability</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .obs-frame {
+            width: 100%;
+            height: 80vh;
+            border: 1px solid var(--border, #ddd);
+            border-radius: 8px;
+        }
+        .obs-links { margin: 0.5rem 0 1rem; }
+        .obs-links code { font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1>Observability</h1>
+        <p class="tagline">
+            Live SLO &amp; metrics dashboard for Stock Insights &mdash; served by Grafana over
+            Prometheus. Covers the two reliability planes: <strong>request serving</strong>
+            (availability &amp; latency) and <strong>data freshness</strong> (cache staleness).
+        </p>
+
+        <p class="obs-links muted">
+            Raw endpoints:
+            <a th:href="@{/actuator/prometheus}"><code>/actuator/prometheus</code></a> (scrape),
+            <a th:href="@{/actuator/health}"><code>/actuator/health</code></a> (health),
+            and the full dashboard directly in
+            <a th:href="${grafanaUrl}" target="_blank" rel="noopener">Grafana</a>.
+        </p>
+
+        <!-- Embeds the single provisioned Grafana dashboard (kiosk mode hides its chrome).
+             Grafana runs as its own container, so this view survives app downtime — open the
+             Grafana link above directly when the app itself is unavailable. -->
+        <iframe class="obs-frame"
+                th:src="${embedUrl}"
+                title="Stock Insights SLO dashboard"
+                loading="lazy"></iframe>
+
+        <p class="muted">
+            Not seeing the dashboard? Start the stack with <code>docker compose up --build</code>
+            (brings up the app, Prometheus, and Grafana) &mdash; see the Observability section of the
+            README. <a th:href="@{/dashboard}">&larr; Back to dashboard</a>
+        </p>
+    </main>
+</body>
+</html>

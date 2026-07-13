@@ -62,6 +62,8 @@ Then open:
 - <http://localhost:8080/stocks/AAPL> — stock detail: latest quote, company profile, and a price-history chart
 - <http://localhost:8080/api/stocks/AAPL/history> — JSON price history (backs the chart)
 - <http://localhost:8080/health> — health check (`{"status":"UP",...}`)
+- <http://localhost:8080/observability> — SLO & metrics dashboard (embeds Grafana; see [Observability](#observability-metrics-slos--dashboards))
+- <http://localhost:8080/actuator/prometheus> — Prometheus metrics scrape endpoint
 
 Quotes and company profiles come from Finnhub (needs a free key); **price history
 comes from a keyless source, so the chart works with no key at all.** Without a
@@ -135,6 +137,70 @@ sets a container-appropriate H2 URL (no `AUTO_SERVER`) and a `/health` healthche
 
   If it persists, **restart Docker Desktop**, then `docker compose up --build`. Dropping the
   volume (`-v`) is safe — it only holds the local cache, which is re-fetched on next start.
+
+## Observability (metrics, SLOs & dashboards)
+
+Stock Insights ships a full metrics + SLO stack you can bring up with one command. The design
+principle: **serving** (request availability & latency) and **data freshness** (cache staleness) are
+tracked as two independent reliability planes, so an upstream (Finnhub) outage burns the *freshness*
+budget while the *serving* SLO stays green. The SLO maths lives once, as Prometheus recording rules,
+and is presented once, in Grafana. Full design: [docs/SLO.md](docs/SLO.md) and
+[docs/SLO-DASHBOARD.md](docs/SLO-DASHBOARD.md).
+
+### What the app exposes
+
+Spring Boot Actuator + Micrometer expose these endpoints on the app (port 8080):
+
+| Endpoint | What it is |
+|----------|-----------|
+| `/actuator/prometheus` | Prometheus scrape endpoint (all metrics, text format) |
+| `/actuator/health` | Actuator health (the simple public `/health` is still there too) |
+| `/observability` | In-app page that embeds the Grafana SLO dashboard |
+
+Metrics exposed include:
+
+- **`http_server_requests_seconds`** (histogram) — per-route request rate, error rate, and latency
+  quantiles; SLO histogram buckets at 150ms/300ms/800ms. Backs the serving availability & latency SLOs.
+- **`cache_quote_fresh_ratio`** (gauge) — fraction of watchlist tickers whose cached quote is within
+  the freshness threshold (2× the live-refresh interval). The freshness SLI.
+- **`cache_quote_oldest_age_seconds`** (gauge) — age of the oldest cached quote; drives a staleness alert.
+- **`refresh_cycle_duration_seconds`** (timer, tagged by `tier`) — duration and cadence-liveness of the
+  background live/reference refresh loops.
+
+### Run the whole stack
+
+`docker compose up --build` starts three containers:
+
+| Service | URL | Role |
+|---------|-----|------|
+| `app` | <http://localhost:8080> | the application (scraped at `/actuator/prometheus`) |
+| `prometheus` | <http://localhost:9090> | time-series database + scraper + SLO recording/alerting rules |
+| `grafana` | <http://localhost:3000> | dashboards (Prometheus datasource + SLO dashboard auto-provisioned) |
+
+```bash
+export FINNHUB_API_KEY=your_key_here   # optional; without it quotes stay as placeholders
+docker compose up --build
+```
+
+Then open:
+
+- **<http://localhost:8080/observability>** — the SLO dashboard embedded inside the app, **or**
+- **<http://localhost:3000>** — Grafana directly (dashboard **Stock Insights → Stock Insights SLO**).
+  Grafana is a separate container reading Prometheus, so this view still works even if the app is down —
+  the in-app page is a convenience embed. Anonymous read-only access is enabled for local use; put
+  Grafana behind SSO / a reverse proxy for any real deployment.
+
+Everything is provisioned as code — no click-ops:
+
+```
+prometheus/prometheus.yml              scrape config
+prometheus/rules/slo.rules.yml         SLO recording + alerting rules (single source of truth)
+grafana/provisioning/                  datasource + dashboard providers
+grafana/dashboards/stock-insights-slo.json   the SLO dashboard model
+```
+
+Point the in-app page at a Grafana elsewhere with
+`STOCK_INSIGHTS_OBSERVABILITY_GRAFANA_URL=https://grafana.example.com`.
 
 ## Data sources (free tiers)
 

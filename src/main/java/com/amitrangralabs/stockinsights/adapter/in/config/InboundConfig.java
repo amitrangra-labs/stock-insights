@@ -5,6 +5,7 @@ import com.amitrangralabs.stockinsights.adapter.in.endpoint.HealthEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.HomeEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceHistoryApiEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.LiveSnapshotScheduler;
+import com.amitrangralabs.stockinsights.adapter.in.endpoint.ObservabilityEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.PriceStreamEndpoint;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.RefreshScheduler;
 import com.amitrangralabs.stockinsights.adapter.in.endpoint.StockDetailEndpoint;
@@ -18,11 +19,13 @@ import com.amitrangralabs.stockinsights.domain.service.SymbolSearchService;
 import com.amitrangralabs.stockinsights.domain.service.WatchlistService;
 import com.amitrangralabs.stockinsights.port.MarketDataRepositoryPort;
 import com.amitrangralabs.stockinsights.port.WatchlistPort;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
@@ -51,8 +54,11 @@ public class InboundConfig {
         };
     }
 
+    // Named to avoid a bean-name clash with Actuator's own 'healthEndpoint' bean (Boot disables
+    // bean-definition overriding by default). This serves the app's simple public /health; Actuator
+    // separately serves /actuator/health.
     @Bean
-    public HealthEndpoint healthEndpoint() {
+    public HealthEndpoint appHealthEndpoint() {
         return new HealthEndpoint();
     }
 
@@ -67,8 +73,19 @@ public class InboundConfig {
     }
 
     @Bean
-    public RefreshScheduler refreshScheduler(MarketDataRefreshService marketDataRefreshService) {
-        return new RefreshScheduler(marketDataRefreshService);
+    public RefreshScheduler refreshScheduler(
+            MarketDataRefreshService marketDataRefreshService, MeterRegistry meterRegistry) {
+        return new RefreshScheduler(marketDataRefreshService, meterRegistry);
+    }
+
+    @Bean
+    public ObservabilityEndpoint observabilityEndpoint(Environment env) {
+        String grafanaUrl =
+                env.getProperty("stock-insights.observability.grafana-url", "http://localhost:3000");
+        String dashboardUid =
+                env.getProperty(
+                        "stock-insights.observability.dashboard-uid", "stock-insights-slo");
+        return new ObservabilityEndpoint(grafanaUrl, dashboardUid);
     }
 
     @Bean

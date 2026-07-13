@@ -1,0 +1,21 @@
+# Prometheus scrape + rule configuration for the Stock Insights observability stack.
+# Prometheus is the time-series database: it pulls metrics from the app's Actuator
+# endpoint, stores them, and evaluates the SLO recording rules in rules/.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/rules/*.rules.yml
+
+scrape_configs:
+  - job_name: stock-insights
+    metrics_path: /actuator/prometheus
+    static_configs:
+      # 'app' is the docker-compose service name; Prometheus resolves it on the compose network.
+      - targets: ["app:8080"]
+
+  # Prometheus scraping itself (handy for verifying the stack is alive).
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

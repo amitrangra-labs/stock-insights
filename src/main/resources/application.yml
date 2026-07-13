@@ -21,9 +21,35 @@ spring:
 server:
   port: 8080
 
+# Observability. Actuator exposes health, build info, and a Prometheus scrape endpoint
+# at /actuator/prometheus. Percentile histograms are enabled on the HTTP server timer so
+# Prometheus/Grafana can compute latency-SLO ratios (fraction of requests under a bound)
+# and true quantiles across instances. The `slo` buckets match the latency targets in
+# docs/SLO.md so recording rules can query e.g. le="0.3".
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: stock-insights
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 150ms, 300ms, 800ms
+
 # Application-specific config. API keys are read from environment variables so they
 # are never committed. See .env.example for the full list.
 stock-insights:
+  observability:
+    # Base URL of the Grafana container that the in-app /observability page embeds.
+    # Points at the host-published Grafana port from docker-compose. Override with
+    # STOCK_INSIGHTS_OBSERVABILITY_GRAFANA_URL when Grafana lives elsewhere.
+    grafana-url: http://localhost:3000
+    # UID of the provisioned SLO dashboard (see grafana/dashboards/stock-insights-slo.json).
+    dashboard-uid: stock-insights-slo
   # Seed watchlist used on first start only (the watchlist is user-editable after that).
   # Kept to 10 so a fresh install with a Finnhub key stays within the free-tier rate
   # limit (see refresh settings below). Add more via the dashboard search box.
